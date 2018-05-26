@@ -192,7 +192,7 @@ public class GlobalFunctions {
 		int fatherGenesCounted = 0;
 		int motherGenesCounted = 0;
 		
-		int geneNumber = 1;
+		int geneNumber = 0;
 		
 		//attempt to match the genes of the two parents
 		while(fatherGenesCounted < fatherGenesSize || motherGenesCounted < motherGenesSize){

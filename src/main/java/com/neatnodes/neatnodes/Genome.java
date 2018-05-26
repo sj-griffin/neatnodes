@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class Genome {
-	private HashMap<Integer, Node> nodeGenes; //nodeGenes keys correspond to labels, which should be numbered 1-n. they are stored in a hashmap to allow them to be added in any order
+	private HashMap<Integer, Node> nodeGenes; //nodeGenes keys correspond to labels, which should be numbered 0-n. they are stored in a hashmap to ensure that they can always be accessed by the same key
 	private HashMap<Integer, Connection> connectionGenes; //connectionGenes keys correspond to innovation numbers, which will be unique
 	
 	private int numberOfInputs; //both inputs and biases are included in this value
@@ -15,6 +15,7 @@ public class Genome {
 	private double fitness; //the fitness of the genome for its purpose
 	private boolean fitnessMeasured; //true if fitness has been measured. Once fitness has been measured, the genome is locked and no further changes to its design can occur.
 	
+	//when creating a genome, only input, hidden and output nodes need to be added manually. The bias node will be created automatically. However, the bias node must be manually connected to other nodes.
 	public Genome(){
 		nodeGenes = new HashMap<Integer, Node>();
 		connectionGenes = new HashMap<Integer, Connection>();
@@ -23,6 +24,10 @@ public class Genome {
 		
 		fitness = 0.0; //fitness is considered to be not set if it is negative
 		fitnessMeasured = false;
+		
+		//add the bias node. All genomes have exactly one bias node as their node 0
+		addNode(0, Node.BIAS);
+		nodeGenes.get(0).setValue(1.0);
 	}
 	
 	public int getNumberOfInputs() {
@@ -66,8 +71,13 @@ public class Genome {
 			throw new GenomeException();
 		}
 		
+		//if this node is a second bias node, fail
+		if(type == Node.BIAS && nodeGenes.containsKey(0)) {
+			throw new GenomeException();
+		}
+		
 		nodeGenes.put(label, new Node(type, label));
-		if(type == Node.INPUT || type == Node.BIAS){
+		if(type == Node.INPUT){
 			numberOfInputs ++;
 		} else if (type == Node.OUTPUT){
 			numberOfOutputs ++;
@@ -115,7 +125,7 @@ public class Genome {
 			return;
 		}
 		
-		//the chance of each type of mutation occuring are set by global variables
+		//the chance of each type of mutation occurring are set by global variables
 		if(Math.random() < GlobalFunctions.weightMutationChance){
 			mutateWeights();
 		}
@@ -156,7 +166,7 @@ public class Genome {
 		randomConnection.setEnabled(false);
 		
 		//add a new node
-		int newNodeNumber = nodeGenes.size() + 1;
+		int newNodeNumber = nodeGenes.size();
 		addNode(newNodeNumber, Node.HIDDEN);
 		
 		//add two new connections in place of the disabled one
@@ -222,7 +232,11 @@ public class Genome {
 	public Genome cloneGenome(){
 		Genome newGenome = new Genome();
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
+
 			Node n = node.getValue();
+			if(n.getType() == Node.BIAS) {
+				continue; //we do not manually re-add bias nodes as they will already have been created by the constructor
+			}
 			newGenome.addNode(n.getLabel(), n.getType());
 		}
 		
@@ -234,7 +248,8 @@ public class Genome {
 		return newGenome;
 	}
 	
-	//takes a hashmap mapping node labels to values and sets the values on the input and bias nodes
+	//takes a hashmap mapping node labels to values and sets the values on the input nodes
+	//fails if any labels don't map to input nodes
 	//this works because node labels remain consistent across generations
 	public void writeInputs(HashMap<Integer, Double> inputs){
 		if (inputs.size() != numberOfInputs){
@@ -245,8 +260,8 @@ public class Genome {
 		for (Map.Entry<Integer, Double> input : inputs.entrySet()){
 			//get the node with the specified label
 			Node node = nodeGenes.get(input.getKey());
-			//fail if the specified node doesn't exist or is not an input/bias
-			if (node == null || (node.getType() != Node.INPUT && node.getType() != Node.BIAS)){
+			//fail if the specified node doesn't exist or is not an input
+			if (node == null || (node.getType() != Node.INPUT)){
 				throw new GenomeException();
 			}
 			node.setValue(input.getValue()); //set the input node
@@ -275,6 +290,9 @@ public class Genome {
 	
 	//run the whole network for one step
 	public void run(){
+		//ensure that the bias node has a value of 1
+		nodeGenes.get(0).setValue(1.0);
+		
 		//tell all connections to conduct a transfer
 		for (Map.Entry<Integer, Connection> connection : connectionGenes.entrySet()){
 			connection.getValue().transfer();
@@ -285,11 +303,12 @@ public class Genome {
 		}
 	}
 	
-	//sets all values back to 0
+	//sets all values except the bias node back to 0
 	public void reset(){
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
 			node.getValue().reset();
 		}
+		nodeGenes.get(0).setValue(1.0);
 	}
 	
 	public boolean isFitnessMeasured(){

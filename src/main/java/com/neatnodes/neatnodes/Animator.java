@@ -36,6 +36,7 @@ public class Animator extends JPanel implements Runnable {
 	private static final Color RED = new Color(255,0,0);
 	private static final Color GREEN = new Color(0,255,0);
 	private static final Color BLUE = new Color(0,0,255);
+	private static final Color YELLOW = new Color(255,215,0);
 	
 	private static final int NODE_SIZE = 30;
 	
@@ -78,7 +79,12 @@ public class Animator extends JPanel implements Runnable {
 		for (Map.Entry<Integer, Node> node : genome.getNodeGenes().entrySet()){
 			Node n = node.getValue();
 			if(n.getType() == Node.INPUT || n.getType() == Node.BIAS){
-				pGraphics.setColor(GREEN);
+				if(n.getType() == Node.INPUT) {
+					pGraphics.setColor(GREEN);
+				}
+				else {
+					pGraphics.setColor(YELLOW);
+				}
 				pGraphics.drawOval(inputBaseX, inputBaseY, NODE_SIZE, NODE_SIZE);
 				pGraphics.fillOval(inputBaseX, inputBaseY, NODE_SIZE, NODE_SIZE);
 				pGraphics.setColor(BLACK);

@@ -19,13 +19,12 @@ public class Main {
 		
 		//set up an initial population of genomes in an initial species
 		Genome baseGenome = new Genome();
-		baseGenome.addNode(1, Node.BIAS); //the bias node
+		baseGenome.addNode(1, Node.INPUT);
 		baseGenome.addNode(2, Node.INPUT);
-		baseGenome.addNode(3, Node.INPUT);
-		baseGenome.addNode(4, Node.OUTPUT);
-		baseGenome.addConnection(1, 4, 1.0, true, GlobalFunctions.getInnovationNumber(1,4));
-		baseGenome.addConnection(2, 4, 1.0, true, GlobalFunctions.getInnovationNumber(2,4));
-		baseGenome.addConnection(3, 4, 1.0, true, GlobalFunctions.getInnovationNumber(3,4));
+		baseGenome.addNode(3, Node.OUTPUT);
+		baseGenome.addConnection(0, 3, 1.0, true, GlobalFunctions.getInnovationNumber(0,3)); //the bias node must be manually connected to the output
+		baseGenome.addConnection(1, 3, 1.0, true, GlobalFunctions.getInnovationNumber(1,3));
+		baseGenome.addConnection(2, 3, 1.0, true, GlobalFunctions.getInnovationNumber(2,3));
 		
 		allSpecies.add(new Species(baseGenome, 0.0, 0));
 		
@@ -81,7 +80,7 @@ public class Main {
 				//if the species has more than 5 members, copy the champion to the next generation unchanged
 				if(currentSpecies.getGenomes().size() > 5){
 					nextGeneration.add(champion);
-					//reduce the number of offspring by 1 to accomodate this
+					//reduce the number of offspring by 1 to accommodate this
 					numberOfOffspring --;
 				}
 				
@@ -251,9 +250,8 @@ public class Main {
 		
 		//set the inputs
 		inputs = new HashMap<Integer, Double>();
-		inputs.put(1, 1.0); //the bias input
-		inputs.put(2, input1);
-		inputs.put(3, input2);
+		inputs.put(1, input1);
+		inputs.put(2, input2);
 		g.writeInputs(inputs);
 		
 		//run the genome for a preset number of cycles
@@ -264,7 +262,7 @@ public class Main {
 		//read the output
 		results = g.readOutputs();
 		g.reset();
-		return results.get(4);
+		return results.get(3);
 	}
 
 }
