@@ -8,9 +8,12 @@ import java.util.HashMap;
 import javax.swing.SwingUtilities;
 
 public class Main {
-
+	
 	public static void main(String[] args) {
-		
+		generateGenome();
+	}
+
+	public static void generateGenome() {
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		//we start with a uniform population with no hidden nodes
 		
@@ -35,8 +38,8 @@ public class Main {
 		
 		Genome globalChampion = null;
 		
-		//run the simulation for 1500 generations
-		for(int generation = 0; generation < 1500; generation ++){
+		//run the simulation for the configured number of generations
+		for(int generation = 0; generation < GlobalFunctions.numberOfGenerations; generation ++){
 			System.out.println("Starting generation " + generation);
 						
 			double globalFitnessSum = 0.0; //the sum of all average fitnesses of all species

@@ -20,6 +20,8 @@ public class GlobalFunctions {
 	
 	public static final int initialPopulationSize = 150;
 	
+	public static final int numberOfGenerations = 1500; // the number of generations to run the simulation for
+	
 	public static final double crossoverProportion = 0.75; //the fraction of offspring which are created by crossing two genomes. The rest are cloned from a single genome.
 	
 	public static final int depth = 3; //controls the number of cycles to run each genome for before reading a result. It is the equivalent of the "depth" in a feed-forward network
