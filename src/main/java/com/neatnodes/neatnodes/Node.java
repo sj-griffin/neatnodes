@@ -35,6 +35,11 @@ public class Node {
 		inputs.add(input);
 	}
 	
+	//return the inputs list. For use by unit tests only.
+	protected ArrayList<Double> getInputs(){
+		return this.inputs;
+	}
+	
 	//return the value being output by the node
 	public double getValue(){
 		return value;
@@ -60,8 +65,7 @@ public class Node {
 	}
 	
 	private double sigmoid(double x){
-		//return 2/(1+Math.exp(-4.9*x))-1; //modified sigmoid from example code (returns results between -1 and 1)
-		return 1/(1+Math.exp(-4.9*x)); //sigmoid from paper (returns results between 0 and 1)
+		return 1/(1+Math.exp(-4.9*x)); //sigmoid function (returns results between 0 and 1)
 	}
 	
 	
