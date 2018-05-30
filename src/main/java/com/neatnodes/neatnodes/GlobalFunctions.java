@@ -61,7 +61,7 @@ public class GlobalFunctions {
 	}
 	
 	
-	/**return the compatability distance bewtween two genomes
+	/**return the compatability distance between two genomes
 	*key variables:
 	*numberOfExcessGenes: the number of excess genes (E)
 	*numberOfDisjointGenes: the number of disjoint genes (D)

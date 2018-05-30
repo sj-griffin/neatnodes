@@ -1,9 +1,15 @@
 package com.neatnodes.neatnodes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -11,7 +17,7 @@ import org.junit.jupiter.api.function.Executable;
 public class Tests {
 	//Node tests
 	@Test
-	public void testCreateNode(){
+	public void testNodeCreate(){
 		Node n = new Node(Node.INPUT, 1);
 		
 		assertEquals(Node.INPUT, n.getType());
@@ -20,7 +26,7 @@ public class Tests {
 	}
 	
 	@Test
-	public void testFireNode(){
+	public void testNodeFire(){
 		Node inNode = new Node(Node.INPUT, 1);
 		inNode.addInput(0.5);
 		inNode.addInput(0);
@@ -51,7 +57,8 @@ public class Tests {
 	}
 	
 	@Test
-	public void testSetNodeValue(){
+	public void testNodeSetValue(){
+		//value should be set for input or bias nodes
 		Node inNode = new Node(Node.INPUT, 1);
 		inNode.setValue(0.75);
 		assertEquals(0.75, inNode.getValue(), 0.0001);
@@ -59,22 +66,20 @@ public class Tests {
 		Node biasNode = new Node(Node.BIAS, 1);
 		biasNode.setValue(0.75);
 		assertEquals(0.75, biasNode.getValue(), 0.0001);
-	}
-	
-	@Test
-	public void testSetNodeValueException() {
+		
+		//exception should be thrown when trying to set an output or hidden node
 		Node outNode = new Node(Node.OUTPUT, 1);
-	    Executable codeToTest1 = () -> { outNode.setValue(0.75); };		
-	    assertThrows(GenomeException.class, codeToTest1);
+	    Executable testBlock = () -> { outNode.setValue(0.75); };		
+	    assertThrows(GenomeException.class, testBlock);
 	    
 		Node hiddenNode = new Node(Node.HIDDEN, 1);
-	    Executable codeToTest2 = () -> { hiddenNode.setValue(0.75); };		
-	    assertThrows(GenomeException.class, codeToTest2);
+	    testBlock = () -> { hiddenNode.setValue(0.75); };		
+	    assertThrows(GenomeException.class, testBlock);
 	}
 	
 	//Connection tests
 	@Test
-	public void testCreateConnection() {
+	public void testConnectionCreate() {
 		Node inNode = new Node(Node.HIDDEN, 1);
 		Node outNode = new Node(Node.HIDDEN, 2);
 		Connection connection = new Connection(inNode, outNode, 5, true, 1);
@@ -116,5 +121,338 @@ public class Tests {
 		}
 	}
 
+	//Genome tests
 	
+	@Test
+	public void testGenomeCreate() {
+		Genome g = new Genome();
+		assertEquals(0, g.getNumberOfInputs());
+		assertEquals(0, g.getNumberOfOutputs());
+		assertEquals(false, g.isFitnessMeasured());
+		
+		assertEquals(0, g.getNodeGenes().size());
+		assertEquals(0, g.getConnectionGenes().size());
+	}
+	
+	@Test
+	public void testGenomeAddNode(){
+		Genome g = new Genome();
+		g.addNode(1, Node.INPUT);
+		assertEquals(1, g.getNodeGenes().size());
+		assertEquals(1, g.getNumberOfInputs());
+		assertEquals(0, g.getNumberOfOutputs());
+		Node n = g.getNode(1);
+		assertEquals(Node.INPUT, n.getType());
+		assertEquals(1, n.getLabel());
+		
+		g.addNode(2, Node.BIAS);
+		assertEquals(2, g.getNodeGenes().size());
+		assertEquals(2, g.getNumberOfInputs());
+		assertEquals(0, g.getNumberOfOutputs());
+		n = g.getNode(2);
+		assertEquals(Node.BIAS, n.getType());
+		assertEquals(2, n.getLabel());
+		
+		g.addNode(3, Node.HIDDEN);
+		assertEquals(3, g.getNodeGenes().size());
+		assertEquals(2, g.getNumberOfInputs());
+		assertEquals(0, g.getNumberOfOutputs());
+		n = g.getNode(3);
+		assertEquals(Node.HIDDEN, n.getType());
+		assertEquals(3, n.getLabel());
+		
+		g.addNode(4, Node.OUTPUT);
+		assertEquals(4, g.getNodeGenes().size());
+		assertEquals(2, g.getNumberOfInputs());
+		assertEquals(1, g.getNumberOfOutputs());
+		n = g.getNode(4);
+		assertEquals(Node.OUTPUT, n.getType());
+		assertEquals(4, n.getLabel());
+		
+		//add should fail if the node type is invalid
+		Executable testBlock = () -> { g.addNode(4, 0); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    testBlock = () -> { g.addNode(4, 5); };
+	    assertThrows(GenomeException.class, testBlock);
+
+		//add should fail if the label already exists
+		testBlock = () -> { g.addNode(1, Node.HIDDEN); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+		//add should fail if the fitness has already been measured
+	    g.setFitness(1);
+		testBlock = () -> { g.addNode(4, Node.HIDDEN); };		
+	    assertThrows(GenomeException.class, testBlock);
+	}
+	
+	@Test
+	public void testGenomeAddConnection() {
+		Genome g = new Genome();
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.OUTPUT);
+		g.addConnection(1, 2, 5, true, 3);
+		
+		assertEquals(1, g.getConnectionGenes().size());
+		Connection c = g.getConnection(3);
+		assertEquals(g.getNode(1), c.getInNode());
+		assertEquals(g.getNode(2), c.getOutNode());
+		assertEquals(5.0, c.getWeight());
+		assertEquals(true, c.isEnabled());
+		assertEquals(3, c.getInnovationNumber());
+		
+		//add should fail if the innovation number already exists in the genome
+		Executable testBlock = () -> { g.addConnection(2, 1, 4, true, 3); };
+		assertThrows(GenomeException.class, testBlock);
+		
+		//add should fail if either node doesn't exist in the genome
+		testBlock = () -> { g.addConnection(3, 2, 1, true, 4); };
+		assertThrows(GenomeException.class, testBlock);
+		
+		testBlock = () -> { g.addConnection(2, 3, 1, true, 5); };
+		assertThrows(GenomeException.class, testBlock);
+		
+		//add should fail if the fitness has already been measured
+	    g.setFitness(1);
+		testBlock = () -> { g.addConnection(1, 2, 1, true, 6); };		
+	    assertThrows(GenomeException.class, testBlock);
+	}
+	
+	@Test
+	public void testGenomeMutateWeights() {
+		Genome g = new Genome();
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.OUTPUT);
+		g.addConnection(1, 2, 5, true, 1);
+		
+		g.mutateWeights();
+		double weight = g.getConnection(1).getWeight();
+		assertNotSame(5.0, weight);
+		assertTrue((weight >= 4.9 && weight <= 5.1) || (weight >= -2 && weight <= 2));
+	}
+	
+	@Test
+	public void testGenomeNodeMutatation() {
+		Genome g = new Genome();
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.OUTPUT);
+		g.addConnection(1, 2, 5, false, GlobalFunctions.getInnovationNumber(1, 2));
+		
+		g.nodeMutation();
+		
+		//nothing should happen if the connection is disabled
+		assertNull(g.getNode(3));
+		assertNull(g.getConnection(GlobalFunctions.getInnovationNumber(1, 3)));
+		assertNull(g.getConnection(GlobalFunctions.getInnovationNumber(3, 2)));
+		
+		g.getConnection(GlobalFunctions.getInnovationNumber(1, 2)).setEnabled(true);
+		g.nodeMutation();
+		
+		//if the connection is enabled, the mutation should occur
+		Node newNode = g.getNode(3);
+		Connection oldConnection = g.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
+		Connection newConnection1 = g.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		Connection newConnection2 = g.getConnection(GlobalFunctions.getInnovationNumber(3, 2));
+		
+		assertEquals(Node.HIDDEN, newNode.getType());
+		assertEquals(3, newNode.getLabel());
+		assertEquals(false, oldConnection.isEnabled());
+		assertEquals(1, newConnection1.getInNode().getLabel());
+		assertEquals(3, newConnection1.getOutNode().getLabel());
+		assertEquals(3, newConnection2.getInNode().getLabel());
+		assertEquals(2, newConnection2.getOutNode().getLabel());
+		assertEquals(3, g.getConnectionGenes().size());
+	}
+	
+	@Test
+	public void testGenomeLinkMutation() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.INPUT);
+		g.addNode(4, Node.OUTPUT);
+		g.addNode(5, Node.HIDDEN);
+		g.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addConnection(2, 4, 1, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g.addConnection(3, 4, 1, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g.addConnection(5, 4, 1, true, GlobalFunctions.getInnovationNumber(5, 4));
+		g.addConnection(1, 5, 1, true, GlobalFunctions.getInnovationNumber(1, 5));
+		g.addConnection(2, 5, 1, true, GlobalFunctions.getInnovationNumber(2, 5));
+		g.addConnection(3, 5, 1, true, GlobalFunctions.getInnovationNumber(3, 5));
+		g.addConnection(4, 5, 1, true, GlobalFunctions.getInnovationNumber(4, 5));
+		g.addConnection(5, 5, 1, true, GlobalFunctions.getInnovationNumber(5, 5));
+		g.addConnection(4, 4, 1, true, GlobalFunctions.getInnovationNumber(4, 4));
+		
+		//if every possible connection is already made, there should be no change
+		g.linkMutation();
+		assertEquals(10, g.getConnectionGenes().size());
+		
+		g.addNode(6, Node.INPUT);
+		g.addConnection(6, 4, 1, true, GlobalFunctions.getInnovationNumber(6, 4));
+		
+		//the mutation should create the connection 6 -> 5, as it is the only remaining connection that doesn't violate any rules
+		g.linkMutation();
+		assertEquals(12, g.getConnectionGenes().size());
+		assertNotNull(g.getConnection(GlobalFunctions.getInnovationNumber(6, 5)));
+	}
+	
+	@Test
+	public void testGenomeCloneGenome() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addNode(4, Node.HIDDEN);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 1, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		
+		g1.setFitness(100);
+		
+		Genome g2 = g1.cloneGenome();
+		
+		//the new genome should be a copy of the old one
+		assertEquals(4, g2.getNodeGenes().size());
+		assertEquals(4, g2.getConnectionGenes().size());
+		assertEquals(2, g2.getNumberOfInputs());
+		assertEquals(1, g2.getNumberOfOutputs());
+		assertNotNull(g2.getNode(1));
+		assertNotNull(g2.getNode(2));
+		assertNotNull(g2.getNode(3));
+		assertNotNull(g2.getNode(4));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 3)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(2, 3)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(4, 3)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 4)));
+
+		//the new genome should be editable
+		assertFalse(g2.isFitnessMeasured());
+	}
+	
+	@Test
+	public void testGenomeWriteInputs() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.INPUT);
+		g.addNode(4, Node.OUTPUT);
+		g.addNode(5, Node.HIDDEN);
+		
+		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
+		inputs.put(1, 2.3);
+		inputs.put(2, 4.5);
+		inputs.put(3, 1.8);
+		g.writeInputs(inputs);
+		
+		assertEquals(2.3, g.getNode(1).getValue());
+		assertEquals(4.5, g.getNode(2).getValue());
+		assertEquals(1.8, g.getNode(3).getValue());
+		
+		inputs.remove(3);
+		
+		//write should fail if the number of inputs is wrong
+		Executable testBlock = () -> { g.writeInputs(inputs); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    //write should fail if the keys don't all correspond to bias or input nodes
+	    inputs.put(4, 8.7);
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    inputs.remove(4);
+	    inputs.put(5, 4.1);
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    inputs.remove(5);
+	    inputs.put(6, 6.9);
+	    assertThrows(GenomeException.class, testBlock);
+	}
+	
+	@Test
+	public void testGenomeReadOutputs() {
+		Genome g = new Genome();
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.OUTPUT);
+		g.addNode(5, Node.OUTPUT);
+		
+		HashMap<Integer, Double> outputs = g.readOutputs();
+		assertEquals(3, outputs.keySet().size());
+		assertEquals(0.0, outputs.get(3), 0.001);
+		assertEquals(0.0, outputs.get(4), 0.001);
+		assertEquals(0.0, outputs.get(5), 0.001);
+	}
+	
+	@Test
+	public void testGenomeRun() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		g.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		
+		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
+		inputs.put(1, 0.5);
+		inputs.put(2, 2.3);
+		g.writeInputs(inputs);
+		
+		g.run();
+		
+		assertEquals(0.5, g.getNode(1).getValue(), 0.000000000001);
+		assertEquals(2.3, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.9999999999859726, g.getNode(3).getValue(), 0.000000000001);
+		assertEquals(0.9205614508160216, g.getNode(4).getValue(), 0.000000000001);
+
+		g.run();
+
+		assertEquals(0.5, g.getNode(1).getValue(), 0.000000000001);
+		assertEquals(2.3, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(1.0, g.getNode(3).getValue(), 0.000000000001);
+		assertEquals(0.9205614508160216, g.getNode(4).getValue(), 0.000000000001);
+	}
+	
+	@Test
+	public void testGenomeReset() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		
+		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
+		inputs.put(1, 0.5);
+		inputs.put(2, 2.3);
+		g.writeInputs(inputs);
+		
+		g.reset();
+		
+		assertEquals(0.0, g.getNode(1).getValue(), 0.000000000001);
+		assertEquals(0.0, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.0, g.getNode(3).getValue(), 0.000000000001);
+		assertEquals(0.0, g.getNode(4).getValue(), 0.000000000001);
+	}
+	
+	@Test
+	public void testGenomeSetFitness() {
+		Genome g = new Genome();
+		g.setFitness(25);
+		
+		assertTrue(g.isFitnessMeasured());
+		assertEquals(25, g.getFitness());
+	}
+	
+	@Test
+	public void testGenomeGetFitness() {
+		Genome g = new Genome();
+		
+		//method should fail if the fitness has not been set
+		Executable testBlock = () -> { g.getFitness(); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    g.setFitness(80);
+		assertEquals(80, g.getFitness());
+	}
 }

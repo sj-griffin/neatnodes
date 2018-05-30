@@ -61,7 +61,7 @@ public class Genome {
 			throw new GenomeException();
 		}
 		
-		//if a gene with the specified number already exists, fail
+		//if a gene with the specified label already exists, fail
 		if(nodeGenes.containsKey(label)){
 			throw new GenomeException();
 		}
@@ -75,7 +75,7 @@ public class Genome {
 	}
 	
 	//adds a new connection defined by the arguments and returns true if successful
-	//in and out nodes are defined by their numbers in the genome to ensure that the nodes exist in the genome
+	//in and out nodes are defined by their number in the genome to ensure that the nodes exist in the genome
 	public void addConnection(int inNodeNumber, int outNodeNumber, double weight, boolean enabled, int innovationNumber){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
@@ -89,12 +89,9 @@ public class Genome {
 		
 		//the nodes being connected can be the same node as recursive connections are allowed
 		
-		//the nodes being connected must exist in the genome
-		Node inNode = null;
-		Node outNode = null;
-		
-		inNode = nodeGenes.get(inNodeNumber);
-		outNode = nodeGenes.get(outNodeNumber);
+		//the nodes being connected must exist in the genome		
+		Node inNode = nodeGenes.get(inNodeNumber);
+		Node outNode = nodeGenes.get(outNodeNumber);
 		
 		if(inNode == null || outNode == null){
 			throw new GenomeException();
@@ -127,8 +124,7 @@ public class Genome {
 		}
 	}
 	
-	private void mutateWeights(){
-		//this function is based on the pointMutate function of the reference code
+	protected void mutateWeights(){
 		for (Map.Entry<Integer, Connection> connection : connectionGenes.entrySet()){
 			//each gene has a 90% chance of being perturbed and a 10% chance of being assigned a new random value
 			if(Math.random() < 0.9){
@@ -140,7 +136,7 @@ public class Genome {
 		}
 	}
 	
-	private void nodeMutation(){
+	protected void nodeMutation(){
 		//pick a random connection
 		Random random = new Random();
 		ArrayList<Integer> keys = new ArrayList<Integer>(connectionGenes.keySet());
@@ -164,7 +160,7 @@ public class Genome {
 		addConnection(newNodeNumber, randomConnection.getOutNode().getLabel(), randomConnection.getWeight(), true, GlobalFunctions.getInnovationNumber(newNodeNumber, randomConnection.getOutNode().getLabel()));
 	}
 	
-	private void linkMutation(){
+	protected void linkMutation(){
 		//check if the genome already contains all possible connections to avoid an infinite loop
 		//number of possible connections = number of nodes * (number of nodes - number of input nodes)
 		int possibleConnections = nodeGenes.size() * (nodeGenes.size() - numberOfInputs);
@@ -199,6 +195,8 @@ public class Genome {
 			if(containsLink(randomNode1, randomNode2)){
 				continue;
 			}
+			
+			//Note that recurrent connections (where a node connects to itself) are permitted
 			
 			//if all conditions have been met, add the connection and break out of the loop
 			addConnection(randomNode1.getLabel(), randomNode2.getLabel(), Math.random()*4-2, true, GlobalFunctions.getInnovationNumber(randomNode1.getLabel(), randomNode2.getLabel()));
