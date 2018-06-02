@@ -455,4 +455,192 @@ public class Tests {
 	    g.setFitness(80);
 		assertEquals(80, g.getFitness());
 	}
+	
+	//Species tests
+	@Test
+	public void testSpeciesCreate() {
+		Genome g1 = new Genome();
+		Species s = new Species(g1, 100, 0);
+		
+		assertEquals(100, s.getMaxFitness());
+		assertEquals(0, s.getGenerationsWithoutImprovement());
+		assertEquals(0, s.getGenomes().size());
+		assertFalse(s.isFinalised());
+	}
+	
+	@Test
+	public void testSpeciesAddGenome() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addNode(4, Node.HIDDEN);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		
+		Species s = new Species(g1, 100, 0);
+		
+		//if the genomes have a compatability distance less than the compatability threshold (default 1.0), the add should succeed
+		Genome g2 = g1.cloneGenome();
+		g2.addNode(5, Node.HIDDEN);
+		g2.addConnection(5, 4, 1, true, GlobalFunctions.getInnovationNumber(5, 4));
+		
+		assertTrue(s.addGenome(g2));
+		ArrayList<Genome> genomes = s.getGenomes();
+		assertEquals(1, genomes.size());
+		assertEquals(g2, genomes.get(0));
+
+		//if the genomes have a compatability distance greater than the threshold, the add should fail
+		Genome g3 = g2.cloneGenome();
+		g3.addConnection(3, 4, 6, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g3.getConnection(GlobalFunctions.getInnovationNumber(2, 3)).setWeight(5);
+		g3.getConnection(GlobalFunctions.getInnovationNumber(1, 4)).setWeight(8);
+		
+		assertFalse(s.addGenome(g3));
+		genomes = s.getGenomes();
+		assertEquals(1, genomes.size());
+		
+		//if the species is already finalised, adds should fail
+		for (Genome g : genomes) {
+			g.setFitness(100);
+		}
+		s.calculateAverageFitness();
+		Genome g4 = g3.cloneGenome();
+		
+		Executable testBlock = () -> { s.addGenome(g4); };		
+	    assertThrows(GenomeException.class, testBlock);
+	}
+	
+	@Test
+	public void testSpeciesCalculateAverageFitness(){
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addNode(4, Node.HIDDEN);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		Genome g2 = g1.cloneGenome();
+		Genome g3 = g1.cloneGenome();
+		Genome g4 = g1.cloneGenome();
+		g1.setFitness(20);
+		g2.setFitness(157);
+		g3.setFitness(302.87);
+		g4.setFitness(85.4222);
+		Species s = new Species(g1, 302.87, 0);
+		s.addGenome(g1);
+		s.addGenome(g2);
+		s.addGenome(g3);
+		s.addGenome(g4);
+		s.calculateAverageFitness();
+		
+		assertTrue(s.isFinalised());
+		assertEquals(141.32305, s.getAverageFitness(), 0.00001);
+	}
+	
+	@Test
+	public void testSpeciesGetAverageFitness() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addNode(4, Node.HIDDEN);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g1.setFitness(30);
+
+		Species s = new Species(g1, 30, 0);
+		s.addGenome(g1);
+		
+		//get should fail if fitness hasn't been calculated yet
+		Executable testBlock = () -> { s.getAverageFitness(); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    //get should succeed once fitness is set
+		s.calculateAverageFitness();
+		assertEquals(30, s.getAverageFitness());
+	}
+	
+	@Test
+	public void testSpeciesCull() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addConnection(1, 2, 1, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.setFitness(45);
+		
+		Species s = new Species(g1, 131, 5);
+		s.addGenome(g1);
+		
+		Genome g2 = g1.cloneGenome();
+		g2.setFitness(17);
+		s.addGenome(g2);
+		Genome g3 = g1.cloneGenome();
+		g3.setFitness(97.54);
+		s.addGenome(g3);
+		Genome g4 = g1.cloneGenome();
+		g4.setFitness(28.123);
+		s.addGenome(g4);
+		Genome g5 = g1.cloneGenome();
+		g5.setFitness(2.9);
+		s.addGenome(g5);
+		Genome g6 = g1.cloneGenome();
+		g6.setFitness(131);
+		s.addGenome(g6);
+		Genome g7 = g1.cloneGenome();
+		g7.setFitness(81.3064);
+		s.addGenome(g7);
+		Genome g8 = g1.cloneGenome();
+		g8.setFitness(32);
+		s.addGenome(g8);
+		Genome g9 = g1.cloneGenome();
+		g9.setFitness(118.23);
+		s.addGenome(g9);
+		
+		//expected behaviour if the existing maxFitness is not exceeded
+		ArrayList<Genome> expectedGenomes = new ArrayList<Genome>();
+		expectedGenomes.add(g1);
+		expectedGenomes.add(g7);
+		expectedGenomes.add(g3);
+		expectedGenomes.add(g9);
+		expectedGenomes.add(g6);
+		
+		Genome champion = s.cull();
+		
+		assertEquals(champion, g6);
+		assertEquals(131, s.getMaxFitness());
+		assertEquals(5, s.getGenerationsWithoutImprovement());
+		ArrayList<Genome> resultGenomes = s.getGenomes();
+		assertEquals(expectedGenomes.size(), resultGenomes.size());
+		for(int i = 0; i < resultGenomes.size(); i ++ ) {
+			assertEquals(expectedGenomes.get(i), resultGenomes.get(i));
+		}
+		
+		//expected behaviour if the max fitness is exceeded
+		Genome g10 = g1.cloneGenome();
+		g10.setFitness(145.56);
+		s.addGenome(g10);
+		expectedGenomes.add(g10);
+		expectedGenomes.remove(0);
+		expectedGenomes.remove(0);
+		expectedGenomes.remove(0);
+		
+		champion = s.cull();
+
+		assertEquals(champion, g10);
+		assertEquals(145.56, s.getMaxFitness());
+		assertEquals(0, s.getGenerationsWithoutImprovement());
+		resultGenomes = s.getGenomes();
+		assertEquals(expectedGenomes.size(), resultGenomes.size());
+		for(int i = 0; i < resultGenomes.size(); i ++ ) {
+			assertEquals(expectedGenomes.get(i), resultGenomes.get(i));
+		}
+	}
+		
 }

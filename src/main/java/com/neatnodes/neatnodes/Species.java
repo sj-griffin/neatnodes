@@ -14,15 +14,15 @@ public class Species {
 	
 	private double maxFitness; //the highest fitness any member of this species or its descendants has reached
 	
-	private int generationsWithoutImproval; //the number of generations since the maxFitness was last increased
+	private int generationsWithoutImprovement; //the number of generations since the maxFitness was last increased
 	
-	public Species(Genome representativeGenome, double maxFitness, int generationsWithoutImproval){
+	public Species(Genome representativeGenome, double maxFitness, int generationsWithoutImprovement){
 		this.representativeGenome = representativeGenome;
-		genomes = new ArrayList<Genome>();
-		averageFitness = 0.0;
-		finalised = false;
+		this.genomes = new ArrayList<Genome>();
+		this.averageFitness = 0.0;
+		this.finalised = false;
 		this.maxFitness = maxFitness;
-		this.generationsWithoutImproval = generationsWithoutImproval;
+		this.generationsWithoutImprovement = generationsWithoutImprovement;
 	}
 	
 	//attempts to add a genome to the species. The genome will only be added if it falls within the compatability threshold for the species.
@@ -69,6 +69,14 @@ public class Species {
 		}
 		return averageFitness;
 	}
+	
+	public double getMaxFitness(){
+		return maxFitness;
+	}
+	
+	public int getGenerationsWithoutImprovement(){
+		return generationsWithoutImprovement;
+	}
 
 	public boolean isFinalised() {
 		return finalised;
@@ -82,17 +90,17 @@ public class Species {
 		}
 		
 		//pick the genomes to breed
-		int fatherIndex = (int)Math.floor(Math.random() * genomes.size());
+		int fatherIndex = (int)Math.floor(Math.random() * this.genomes.size());
 		int motherIndex = -1;
 		if(crossover){
-			motherIndex = (int)Math.floor(Math.random() * genomes.size());
+			motherIndex = (int)Math.floor(Math.random() * this.genomes.size());
 		}
 		else{
 			motherIndex = fatherIndex;
 		}
 		
 		//breed them and apply a mutation to the offspring
-		Genome offspring = GlobalFunctions.breed(genomes.get(fatherIndex), genomes.get(motherIndex));
+		Genome offspring = GlobalFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex));
 		offspring.mutate();
 		
 		return offspring;
@@ -100,23 +108,22 @@ public class Species {
 	
 	//remove the weakest 50% of genomes and return the best performing genome
 	//if the fitness of that genome exceeds the maxFitness, that becomes the new maxFitness
-	//how many to cull is not specified in the paper, but the 50% number was taken from the example code
 	public Genome cull(){
 		//sort the genomes by fitness
-		Genome[] asArray = new Genome[genomes.size()];
-		genomes.toArray(asArray);
+		Genome[] asArray = new Genome[this.genomes.size()];
+		this.genomes.toArray(asArray);
 		quicksort(asArray, 0, asArray.length - 1);
-		//add only the top half of the sorted array beack into the list of genomes
-		genomes = new ArrayList<Genome>();
+		//add only the top half of the sorted array back into the list of genomes
+		this.genomes = new ArrayList<Genome>();
 		int cullThreshold = (int)Math.floor(asArray.length / 2.0);
 		for(int i = cullThreshold; i < asArray.length; i ++){
-			genomes.add(asArray[i]);
+			this.genomes.add(asArray[i]);
 		}
 		
-		Genome champion = genomes.get(genomes.size() - 1);
+		Genome champion = this.genomes.get(this.genomes.size() - 1);
 		if(champion.getFitness() > maxFitness){
 			maxFitness = champion.getFitness();
-			generationsWithoutImproval = 0;
+			generationsWithoutImprovement = 0;
 		}
 		
 		return champion;
@@ -167,13 +174,5 @@ public class Species {
 		input[lessPointer] = p;
 		
 		return lessPointer;
-	}
-	
-	public double getMaxFitness(){
-		return maxFitness;
-	}
-	
-	public int getGenerationsWithoutImproval(){
-		return generationsWithoutImproval;
 	}
 }

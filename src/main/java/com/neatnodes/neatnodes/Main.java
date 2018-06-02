@@ -105,10 +105,10 @@ public class Main {
 				int randomIndex = (int)Math.floor(Math.random() * currentSpecies.getGenomes().size());
 				Genome representative = currentSpecies.getGenomes().get(randomIndex);
 				double maxFitness = currentSpecies.getMaxFitness();
-				int generationsWithoutImproval = currentSpecies.getGenerationsWithoutImproval() + 1;
-				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + maxFitness + ", Stagnant generations: " + generationsWithoutImproval);
+				int generationsWithoutImprovement = currentSpecies.getGenerationsWithoutImprovement() + 1;
+				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + maxFitness + ", Stagnant generations: " + generationsWithoutImprovement);
 				allSpecies.remove(i);
-				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImproval));
+				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement));
 			}
 			
 			System.out.println("Created species for the next generation");

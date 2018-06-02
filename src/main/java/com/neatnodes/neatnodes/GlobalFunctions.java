@@ -272,7 +272,7 @@ public class GlobalFunctions {
 	
 	
 	//add a connection and the nodes it depends on to another genome
-	public static void duplicateConnection(Connection c, Genome g, boolean enabled){
+	protected static void duplicateConnection(Connection c, Genome g, boolean enabled){
 		Node nodeToAdd1 = c.getInNode();
 		Node nodeToAdd2 = c.getOutNode();
 		
