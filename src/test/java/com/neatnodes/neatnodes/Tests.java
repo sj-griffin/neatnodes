@@ -642,5 +642,100 @@ public class Tests {
 			assertEquals(expectedGenomes.get(i), resultGenomes.get(i));
 		}
 	}
+	
+	@Test
+	public void testGlobalFunctionsCalculateCompatabilityDistance() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
 		
+		//g2 has an excess gene, and a gene with a weight difference of 3.5. g1 has a disjoint gene.
+		Genome g2 = new Genome();
+		g2.addNode(1, Node.BIAS);
+		g2.addNode(2, Node.INPUT);
+		g2.addNode(3, Node.OUTPUT);
+		g2.addNode(4, Node.HIDDEN);
+		g2.addConnection(1, 3, 4.5, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g2.addConnection(2, 4, 3, true, GlobalFunctions.getInnovationNumber(2, 4));
+		
+		double result = GlobalFunctions.calculateCompatabilityDistance(g1, g2);
+		
+		assertEquals(2.4, result, 0.000000001);
+		
+		Genome g3 = new Genome();
+		Genome g4 = new Genome();
+		
+		//the calculation should throw an exception if either genome is empty
+		Executable testBlock = () -> { GlobalFunctions.calculateCompatabilityDistance(g3, g4); };		
+	    assertThrows(GenomeException.class, testBlock);
+	}
+	
+	@Test
+	public void testGlobalFunctionsBreed() {
+		Genome g1 = new Genome();
+		g1.addNode(1, Node.BIAS);
+		g1.addNode(2, Node.INPUT);
+		g1.addNode(3, Node.OUTPUT);
+		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.setFitness(10);
+		
+		//g2 has an excess gene, a disjoint gene, a matching gene with a weight difference, and a greater fitness
+		Genome g2 = new Genome();
+		g2.addNode(1, Node.BIAS);
+		g2.addNode(2, Node.INPUT);
+		g2.addNode(3, Node.OUTPUT);
+		g2.addNode(4, Node.HIDDEN);
+		g2.addConnection(1, 3, 4.5, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g2.addConnection(2, 4, 3, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g2.setFitness(20);
+		
+		Genome offspring = GlobalFunctions.breed(g1, g2);
+		
+		assertEquals(2, offspring.getConnectionGenes().size());
+		assertEquals(4, offspring.getNodeGenes().size());
+		
+		//connection 1->3 should have been inherited from either g1 or g2
+		Connection c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		assertNotNull(c);
+		
+		boolean connectionIsCorrect = false;
+		if(c.getWeight() == 1 || c.getWeight() == 4.5){
+			connectionIsCorrect = true;
+		}
+		assertTrue(connectionIsCorrect);
+		
+		//connection 2->4 should have been inherited from g2, as it is fitter
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 4));
+		assertNotNull(c);
+		assertEquals(3, c.getWeight());
+		
+		//connection 2->3 should not have been inherited from g1, as it is not fitter
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 3));
+		assertNull(c);
+		
+		//verify that we get the same results when g2 is the father instead of g1
+		offspring = GlobalFunctions.breed(g2, g1);
+		assertEquals(2, offspring.getConnectionGenes().size());
+		assertEquals(4, offspring.getNodeGenes().size());
+		
+		c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		assertNotNull(c);
+		
+		connectionIsCorrect = false;
+		if(c.getWeight() == 1 || c.getWeight() == 4.5){
+			connectionIsCorrect = true;
+		}
+		assertTrue(connectionIsCorrect);
+		
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 4));
+		assertNotNull(c);
+		assertEquals(3, c.getWeight());
+		
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 3));
+		assertNull(c);
+	}
 }

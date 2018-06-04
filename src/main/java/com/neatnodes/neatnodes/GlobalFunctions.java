@@ -75,6 +75,11 @@ public class GlobalFunctions {
 		int g1GenesSize = g1Genes.size();
 		int g2GenesSize = g2Genes.size();
 		
+		if (g1GenesSize == 0 || g2GenesSize == 0){
+			//the algorithm will not work for empty genomes
+			throw new GenomeException();
+		}
+		
 		int g1GenesCounted = 0;
 		int g2GenesCounted = 0;
 		
@@ -177,7 +182,7 @@ public class GlobalFunctions {
 		}
 		
 		//calculate who is the fitter parent
-		//this code doesn't take in to account the case where parents are equally fit like the paper does, but this is a rare case with virtually no effect, and it is simpler to program it this way
+		//this code doesn't take into account the case where parents are equally fit like the paper does, but this is a rare case with virtually no effect on the outcome
 		boolean fatherIsFitter = false;
 		if(father.getFitness() > mother.getFitness()){
 			fatherIsFitter = true;
@@ -272,7 +277,7 @@ public class GlobalFunctions {
 	
 	
 	//add a connection and the nodes it depends on to another genome
-	protected static void duplicateConnection(Connection c, Genome g, boolean enabled){
+	private static void duplicateConnection(Connection c, Genome g, boolean enabled){
 		Node nodeToAdd1 = c.getInNode();
 		Node nodeToAdd2 = c.getOutNode();
 		
