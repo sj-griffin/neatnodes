@@ -16,14 +16,14 @@ public class Innovation {
 	
 	//returns true if the innovation is equivalent to a connection defined by an in node and an out node
 	public boolean isEquivalent(int inNode, int outNode){
-		if(inNode == inNodeLabel && outNode == outNodeLabel){
+		if(inNode == this.inNodeLabel && outNode == this.outNodeLabel){
 			return true;
 		}
 		return false;
 	}
 	
 	public int getInnovationNumber(){
-		return innovationNumber;
+		return this.innovationNumber;
 	}
 	
 }

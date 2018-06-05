@@ -1,12 +1,6 @@
 package com.neatnodes.neatnodes;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -737,5 +731,131 @@ public class Tests {
 		
 		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 3));
 		assertNull(c);
+	}
+	
+	@Test
+	public void testGlobalFunctionsSetupInitialSpecies() {
+		Species s = GlobalFunctions.setupInitialSpecies(5);
+		assertEquals(5, s.getGenomes().size());
+		assertFalse(s.isFinalised());
+		assertEquals(0, s.getGenerationsWithoutImprovement());
+		assertEquals(0.0, s.getMaxFitness());
+		
+		Genome g = s.getGenomes().get(4);
+		assertEquals(3, g.getNumberOfInputs());
+		assertEquals(1, g.getNumberOfOutputs());
+		assertEquals(3, g.getConnectionGenes().size());
+	}
+	
+	@Test
+	public void testGlobalFunctionsTestXORFitness() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.INPUT);
+		g.addNode(4, Node.OUTPUT);
+		g.addNode(5, Node.HIDDEN);
+		g.addConnection(4, 5, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(4, 5));
+		g.addConnection(5, 5, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(5, 5));
+		g.addConnection(1, 4, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addConnection(4, 4, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(4, 4));
+		g.addConnection(2, 4, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g.addConnection(3, 4, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g.addConnection(1, 5, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(1, 5));
+		g.addConnection(3, 5, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(3, 5));
+		g.addConnection(5, 4, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(5, 4));
+		g.addConnection(2, 5, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(2, 5));
+
+		assertEquals(409.3571230831879, GlobalFunctions.testXORFitness(g), 0.00000000000001);
+	}
+	
+	@Test
+	public void testGlobalFunctionsRunXOR() {
+		Genome g = new Genome();
+		g.addNode(1, Node.BIAS);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.INPUT);
+		g.addNode(4, Node.OUTPUT);
+		g.addNode(5, Node.HIDDEN);
+		g.addConnection(4, 5, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(4, 5));
+		g.addConnection(5, 5, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(5, 5));
+		g.addConnection(1, 4, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addConnection(4, 4, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(4, 4));
+		g.addConnection(2, 4, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g.addConnection(3, 4, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g.addConnection(1, 5, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(1, 5));
+		g.addConnection(3, 5, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(3, 5));
+		g.addConnection(5, 4, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(5, 4));
+		g.addConnection(2, 5, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(2, 5));
+		
+		assertEquals(0.05248796662764476, GlobalFunctions.runXOR(g, 0, 0), 0.000000000000000001);
+		assertEquals(0.08756708774628402, GlobalFunctions.runXOR(g, 1, 1), 0.000000000000000001);
+		assertEquals(0.9849160396696722, GlobalFunctions.runXOR(g, 0, 1), 0.000000000000000001);
+		assertEquals(0.9837502384439617, GlobalFunctions.runXOR(g, 1, 0), 0.000000000000000001);
+	}
+	
+	//Innovation tests
+	@Test
+	public void testInnovationCreate() {
+		Innovation i = new Innovation(15, 1, 2);
+		assertEquals(15, i.getInnovationNumber());
+	}
+	
+	@Test
+	public void testInnovationIsEquivalent() {
+		Innovation i = new Innovation(15, 1, 2);		
+		assertFalse(i.isEquivalent(1, 3));
+		assertFalse(i.isEquivalent(4, 2));
+		assertFalse(i.isEquivalent(2, 1));
+		assertTrue(i.isEquivalent(1, 2));
+		
+	}
+	
+	//InnovationManager tests
+	@Test
+	public void testInnovationManagerCreate() {
+		
+	}
+	
+	@Test
+	public void testInnovationManagerNewGeneration() {
+		
+	}
+	
+	@Test
+	public void testInnovationManagerAddInnovation() {
+		
+	}
+	
+	@Test
+	public void testInnovationManagerGetInnovationNumber() {
+		
+	}
+	
+	//JSONTools tests
+	@Test
+	public void testJSONToolsWriteGenomeToFile() {
+		
+	}
+	
+	@Test
+	public void testJSONToolsReadGenomeFromFile() {
+		
+	}
+	
+	//DataSet tests
+	@Test
+	public void testDataSetCreate() {
+		
+	}
+	
+	@Test
+	public void testDataSetGetInputsForROw() {
+		
+	}
+	
+	@Test
+	public void testDataSetGetOutputsForRow() {
+		
 	}
 }
