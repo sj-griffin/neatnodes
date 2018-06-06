@@ -201,7 +201,7 @@ public class GlobalFunctions {
 		int fatherGenesCounted = 0;
 		int motherGenesCounted = 0;
 		
-		int geneNumber = 1;
+		int geneNumber = 0;
 		
 		//attempt to match the genes of the two parents
 		while(fatherGenesCounted < fatherGenesSize || motherGenesCounted < motherGenesSize){
@@ -302,13 +302,12 @@ public class GlobalFunctions {
 	//takes a populationSize which is the number of genomes to create
 	public static Species setupInitialSpecies(int populationSize) {
 		Genome baseGenome = new Genome();
-		baseGenome.addNode(1, Node.BIAS); //the bias node
+		baseGenome.addNode(1, Node.INPUT);
 		baseGenome.addNode(2, Node.INPUT);
-		baseGenome.addNode(3, Node.INPUT);
-		baseGenome.addNode(4, Node.OUTPUT);
-		baseGenome.addConnection(1, 4, 1.0, true, GlobalFunctions.getInnovationNumber(1,4));
-		baseGenome.addConnection(2, 4, 1.0, true, GlobalFunctions.getInnovationNumber(2,4));
-		baseGenome.addConnection(3, 4, 1.0, true, GlobalFunctions.getInnovationNumber(3,4));
+		baseGenome.addNode(3, Node.OUTPUT);
+		baseGenome.addConnection(0, 3, 1.0, true, GlobalFunctions.getInnovationNumber(0,3));
+		baseGenome.addConnection(1, 3, 1.0, true, GlobalFunctions.getInnovationNumber(1,3));
+		baseGenome.addConnection(2, 3, 1.0, true, GlobalFunctions.getInnovationNumber(2,3));
 		
 		Species result = new Species(baseGenome, 0.0, 0);
 		
@@ -388,9 +387,8 @@ public class GlobalFunctions {
 		
 		//set the inputs
 		inputs = new HashMap<Integer, Double>();
-		inputs.put(1, 1.0); //the bias input
-		inputs.put(2, input1);
-		inputs.put(3, input2);
+		inputs.put(1, input1);
+		inputs.put(2, input2);
 		g.writeInputs(inputs);
 		
 		//run the genome for a preset number of cycles
@@ -401,7 +399,7 @@ public class GlobalFunctions {
 		//read the output
 		results = g.readOutputs();
 		g.reset();
-		return results.get(4);
+		return results.get(3);
 	}
 	
 	public static void runSimulation() {

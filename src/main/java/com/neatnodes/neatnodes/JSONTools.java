@@ -122,6 +122,9 @@ public class JSONTools {
 			JSONArray nodes = obj.getJSONArray("nodes");
 			for(int i = 0; i < nodes.length(); i ++){
 				int type = nodes.getJSONObject(i).getInt("type");
+				if(type == Node.BIAS) {
+					continue; //we don't create the bias node as it has already been initiated
+				}
 				int label = nodes.getJSONObject(i).getInt("label");
 				output.addNode(label, type);
 			}

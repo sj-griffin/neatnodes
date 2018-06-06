@@ -124,7 +124,7 @@ public class Tests {
 		assertEquals(0, g.getNumberOfOutputs());
 		assertEquals(false, g.isFitnessMeasured());
 		
-		assertEquals(0, g.getNodeGenes().size());
+		assertEquals(1, g.getNodeGenes().size());
 		assertEquals(0, g.getConnectionGenes().size());
 	}
 	
@@ -132,36 +132,28 @@ public class Tests {
 	public void testGenomeAddNode(){
 		Genome g = new Genome();
 		g.addNode(1, Node.INPUT);
-		assertEquals(1, g.getNodeGenes().size());
+		assertEquals(2, g.getNodeGenes().size());
 		assertEquals(1, g.getNumberOfInputs());
 		assertEquals(0, g.getNumberOfOutputs());
 		Node n = g.getNode(1);
 		assertEquals(Node.INPUT, n.getType());
 		assertEquals(1, n.getLabel());
 		
-		g.addNode(2, Node.BIAS);
-		assertEquals(2, g.getNodeGenes().size());
-		assertEquals(2, g.getNumberOfInputs());
+		g.addNode(2, Node.HIDDEN);
+		assertEquals(3, g.getNodeGenes().size());
+		assertEquals(1, g.getNumberOfInputs());
 		assertEquals(0, g.getNumberOfOutputs());
 		n = g.getNode(2);
-		assertEquals(Node.BIAS, n.getType());
+		assertEquals(Node.HIDDEN, n.getType());
 		assertEquals(2, n.getLabel());
 		
-		g.addNode(3, Node.HIDDEN);
-		assertEquals(3, g.getNodeGenes().size());
-		assertEquals(2, g.getNumberOfInputs());
-		assertEquals(0, g.getNumberOfOutputs());
-		n = g.getNode(3);
-		assertEquals(Node.HIDDEN, n.getType());
-		assertEquals(3, n.getLabel());
-		
-		g.addNode(4, Node.OUTPUT);
+		g.addNode(3, Node.OUTPUT);
 		assertEquals(4, g.getNodeGenes().size());
-		assertEquals(2, g.getNumberOfInputs());
+		assertEquals(1, g.getNumberOfInputs());
 		assertEquals(1, g.getNumberOfOutputs());
-		n = g.getNode(4);
+		n = g.getNode(3);
 		assertEquals(Node.OUTPUT, n.getType());
-		assertEquals(4, n.getLabel());
+		assertEquals(3, n.getLabel());
 		
 		//add should fail if the node type is invalid
 		Executable testBlock = () -> { g.addNode(4, 0); };		
@@ -176,6 +168,10 @@ public class Tests {
 		//add should fail if the fitness has already been measured
 	    g.setFitness(1);
 		testBlock = () -> { g.addNode(4, Node.HIDDEN); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    //add should fail if the node is a second bias node
+		testBlock = () -> { g.addNode(4, Node.BIAS); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	
@@ -260,46 +256,44 @@ public class Tests {
 	@Test
 	public void testGenomeLinkMutation() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
+		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.INPUT);
-		g.addNode(4, Node.OUTPUT);
-		g.addNode(5, Node.HIDDEN);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		g.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 1, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g.addConnection(0, 4, 1, true, GlobalFunctions.getInnovationNumber(0, 4));
 		g.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
 		g.addConnection(2, 4, 1, true, GlobalFunctions.getInnovationNumber(2, 4));
 		g.addConnection(3, 4, 1, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(5, 4, 1, true, GlobalFunctions.getInnovationNumber(5, 4));
-		g.addConnection(1, 5, 1, true, GlobalFunctions.getInnovationNumber(1, 5));
-		g.addConnection(2, 5, 1, true, GlobalFunctions.getInnovationNumber(2, 5));
-		g.addConnection(3, 5, 1, true, GlobalFunctions.getInnovationNumber(3, 5));
-		g.addConnection(4, 5, 1, true, GlobalFunctions.getInnovationNumber(4, 5));
-		g.addConnection(5, 5, 1, true, GlobalFunctions.getInnovationNumber(5, 5));
 		g.addConnection(4, 4, 1, true, GlobalFunctions.getInnovationNumber(4, 4));
+		g.addConnection(3, 3, 1, true, GlobalFunctions.getInnovationNumber(3, 3));
 		
 		//if every possible connection is already made, there should be no change
 		g.linkMutation();
 		assertEquals(10, g.getConnectionGenes().size());
 		
-		g.addNode(6, Node.INPUT);
-		g.addConnection(6, 4, 1, true, GlobalFunctions.getInnovationNumber(6, 4));
+		g.addNode(5, Node.INPUT);
+		g.addConnection(5, 3, 1, true, GlobalFunctions.getInnovationNumber(5, 3));
 		
-		//the mutation should create the connection 6 -> 5, as it is the only remaining connection that doesn't violate any rules
+		//the mutation should create the connection 5 -> 4, as it is the only remaining connection that doesn't violate any rules
 		g.linkMutation();
 		assertEquals(12, g.getConnectionGenes().size());
-		assertNotNull(g.getConnection(GlobalFunctions.getInnovationNumber(6, 5)));
+		assertNotNull(g.getConnection(GlobalFunctions.getInnovationNumber(5, 4)));
 	}
 	
 	@Test
 	public void testGenomeCloneGenome() {
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addNode(4, Node.HIDDEN);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 1, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g1.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addNode(3, Node.HIDDEN);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 1, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 1, true, GlobalFunctions.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
 		
 		g1.setFitness(100);
 		
@@ -308,16 +302,16 @@ public class Tests {
 		//the new genome should be a copy of the old one
 		assertEquals(4, g2.getNodeGenes().size());
 		assertEquals(4, g2.getConnectionGenes().size());
-		assertEquals(2, g2.getNumberOfInputs());
+		assertEquals(1, g2.getNumberOfInputs());
 		assertEquals(1, g2.getNumberOfOutputs());
+		assertNotNull(g2.getNode(0));
 		assertNotNull(g2.getNode(1));
 		assertNotNull(g2.getNode(2));
 		assertNotNull(g2.getNode(3));
-		assertNotNull(g2.getNode(4));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 3)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(2, 3)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(4, 3)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 4)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(0, 2)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 2)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(3, 2)));
+		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(0, 3)));
 
 		//the new genome should be editable
 		assertFalse(g2.isFitnessMeasured());
@@ -326,38 +320,36 @@ public class Tests {
 	@Test
 	public void testGenomeWriteInputs() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
+		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.INPUT);
-		g.addNode(4, Node.OUTPUT);
-		g.addNode(5, Node.HIDDEN);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
 		
 		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(1, 2.3);
 		inputs.put(2, 4.5);
-		inputs.put(3, 1.8);
 		g.writeInputs(inputs);
 		
 		assertEquals(2.3, g.getNode(1).getValue());
 		assertEquals(4.5, g.getNode(2).getValue());
-		assertEquals(1.8, g.getNode(3).getValue());
 		
-		inputs.remove(3);
+		inputs.remove(2);
 		
 		//write should fail if the number of inputs is wrong
 		Executable testBlock = () -> { g.writeInputs(inputs); };		
 	    assertThrows(GenomeException.class, testBlock);
 	    
-	    //write should fail if the keys don't all correspond to bias or input nodes
-	    inputs.put(4, 8.7);
+	    //write should fail if the keys don't all correspond to input nodes
+	    inputs.put(3, 8.7);
 	    assertThrows(GenomeException.class, testBlock);
 	    
+	    inputs.remove(3);
+	    inputs.put(4, 4.1);
+	    assertThrows(GenomeException.class, testBlock);
+	    
+	    //we shouldn't be able to set the bias node
 	    inputs.remove(4);
-	    inputs.put(5, 4.1);
-	    assertThrows(GenomeException.class, testBlock);
-	    
-	    inputs.remove(5);
-	    inputs.put(6, 6.9);
+	    inputs.put(0, 6.9);
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	
@@ -379,54 +371,50 @@ public class Tests {
 	@Test
 	public void testGenomeRun() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
-		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.OUTPUT);
-		g.addNode(4, Node.HIDDEN);
-		g.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.OUTPUT);
+		g.addNode(3, Node.HIDDEN);
+		g.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
+		g.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
 		
 		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
-		inputs.put(1, 0.5);
-		inputs.put(2, 2.3);
+		inputs.put(1, -0.55);
 		g.writeInputs(inputs);
 		
 		g.run();
 		
-		assertEquals(0.5, g.getNode(1).getValue(), 0.000000000001);
-		assertEquals(2.3, g.getNode(2).getValue(), 0.000000000001);
-		assertEquals(0.9999999999859726, g.getNode(3).getValue(), 0.000000000001);
-		assertEquals(0.9205614508160216, g.getNode(4).getValue(), 0.000000000001);
+		assertEquals(1.0, g.getNode(0).getValue(), 0.000000000001);
+		assertEquals(-0.55, g.getNode(1).getValue(), 0.000000000001);
+		assertEquals(0.3798935676569098, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.9926084586557181, g.getNode(3).getValue(), 0.000000000001);
 
 		g.run();
 
-		assertEquals(0.5, g.getNode(1).getValue(), 0.000000000001);
-		assertEquals(2.3, g.getNode(2).getValue(), 0.000000000001);
-		assertEquals(1.0, g.getNode(3).getValue(), 0.000000000001);
-		assertEquals(0.9205614508160216, g.getNode(4).getValue(), 0.000000000001);
+		assertEquals(1.0, g.getNode(0).getValue(), 0.000000000001);
+		assertEquals(-0.55, g.getNode(1).getValue(), 0.000000000001);
+		assertEquals(0.9999992486130665, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.9926084586557181, g.getNode(3).getValue(), 0.000000000001);
 	}
 	
 	@Test
 	public void testGenomeReset() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
-		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.OUTPUT);
-		g.addNode(4, Node.HIDDEN);
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.OUTPUT);
+		g.addNode(3, Node.HIDDEN);
 		
 		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
-		inputs.put(1, 0.5);
-		inputs.put(2, 2.3);
+		inputs.put(1, 2.3);
 		g.writeInputs(inputs);
 		
 		g.reset();
 		
+		assertEquals(1.0, g.getNode(0).getValue(), 0.000000000001);
 		assertEquals(0.0, g.getNode(1).getValue(), 0.000000000001);
 		assertEquals(0.0, g.getNode(2).getValue(), 0.000000000001);
 		assertEquals(0.0, g.getNode(3).getValue(), 0.000000000001);
-		assertEquals(0.0, g.getNode(4).getValue(), 0.000000000001);
 	}
 	
 	@Test
@@ -465,21 +453,20 @@ public class Tests {
 	@Test
 	public void testSpeciesAddGenome() {
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addNode(4, Node.HIDDEN);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addNode(3, Node.HIDDEN);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
 		
 		Species s = new Species(g1, 100, 0);
 		
 		//if the genomes have a compatability distance less than the compatability threshold (default 1.0), the add should succeed
 		Genome g2 = g1.cloneGenome();
-		g2.addNode(5, Node.HIDDEN);
-		g2.addConnection(5, 4, 1, true, GlobalFunctions.getInnovationNumber(5, 4));
+		g2.addNode(4, Node.HIDDEN);
+		g2.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
 		
 		assertTrue(s.addGenome(g2));
 		ArrayList<Genome> genomes = s.getGenomes();
@@ -488,9 +475,9 @@ public class Tests {
 
 		//if the genomes have a compatability distance greater than the threshold, the add should fail
 		Genome g3 = g2.cloneGenome();
-		g3.addConnection(3, 4, 6, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g3.getConnection(GlobalFunctions.getInnovationNumber(2, 3)).setWeight(5);
-		g3.getConnection(GlobalFunctions.getInnovationNumber(1, 4)).setWeight(8);
+		g3.addConnection(2, 3, 6, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g3.getConnection(GlobalFunctions.getInnovationNumber(1, 2)).setWeight(5);
+		g3.getConnection(GlobalFunctions.getInnovationNumber(0, 3)).setWeight(8);
 		
 		assertFalse(s.addGenome(g3));
 		genomes = s.getGenomes();
@@ -510,14 +497,13 @@ public class Tests {
 	@Test
 	public void testSpeciesCalculateAverageFitness(){
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addNode(4, Node.HIDDEN);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addNode(3, Node.HIDDEN);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
 		Genome g2 = g1.cloneGenome();
 		Genome g3 = g1.cloneGenome();
 		Genome g4 = g1.cloneGenome();
@@ -539,14 +525,13 @@ public class Tests {
 	@Test
 	public void testSpeciesGetAverageFitness() {
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addNode(4, Node.HIDDEN);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g1.addConnection(4, 3, 3, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g1.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addNode(3, Node.HIDDEN);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
 		g1.setFitness(30);
 
 		Species s = new Species(g1, 30, 0);
@@ -640,20 +625,18 @@ public class Tests {
 	@Test
 	public void testGlobalFunctionsCalculateCompatabilityDistance() {
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
 		
 		//g2 has an excess gene, and a gene with a weight difference of 3.5. g1 has a disjoint gene.
 		Genome g2 = new Genome();
-		g2.addNode(1, Node.BIAS);
-		g2.addNode(2, Node.INPUT);
-		g2.addNode(3, Node.OUTPUT);
-		g2.addNode(4, Node.HIDDEN);
-		g2.addConnection(1, 3, 4.5, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g2.addConnection(2, 4, 3, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g2.addNode(1, Node.INPUT);
+		g2.addNode(2, Node.OUTPUT);
+		g2.addNode(3, Node.HIDDEN);
+		g2.addConnection(0, 2, 4.5, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g2.addConnection(1, 3, 3, true, GlobalFunctions.getInnovationNumber(1, 3));
 		
 		double result = GlobalFunctions.calculateCompatabilityDistance(g1, g2);
 		
@@ -670,21 +653,19 @@ public class Tests {
 	@Test
 	public void testGlobalFunctionsBreed() {
 		Genome g1 = new Genome();
-		g1.addNode(1, Node.BIAS);
-		g1.addNode(2, Node.INPUT);
-		g1.addNode(3, Node.OUTPUT);
-		g1.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g1.addConnection(2, 3, 2, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g1.addNode(1, Node.INPUT);
+		g1.addNode(2, Node.OUTPUT);
+		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
 		g1.setFitness(10);
 		
 		//g2 has an excess gene, a disjoint gene, a matching gene with a weight difference, and a greater fitness
 		Genome g2 = new Genome();
-		g2.addNode(1, Node.BIAS);
-		g2.addNode(2, Node.INPUT);
-		g2.addNode(3, Node.OUTPUT);
-		g2.addNode(4, Node.HIDDEN);
-		g2.addConnection(1, 3, 4.5, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g2.addConnection(2, 4, 3, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g2.addNode(1, Node.INPUT);
+		g2.addNode(2, Node.OUTPUT);
+		g2.addNode(3, Node.HIDDEN);
+		g2.addConnection(0, 2, 4.5, true, GlobalFunctions.getInnovationNumber(0, 2));
+		g2.addConnection(1, 3, 3, true, GlobalFunctions.getInnovationNumber(1, 3));
 		g2.setFitness(20);
 		
 		Genome offspring = GlobalFunctions.breed(g1, g2);
@@ -692,8 +673,8 @@ public class Tests {
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
-		//connection 1->3 should have been inherited from either g1 or g2
-		Connection c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		//connection 0->2 should have been inherited from either g1 or g2
+		Connection c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(0, 2));
 		assertNotNull(c);
 		
 		boolean connectionIsCorrect = false;
@@ -702,13 +683,13 @@ public class Tests {
 		}
 		assertTrue(connectionIsCorrect);
 		
-		//connection 2->4 should have been inherited from g2, as it is fitter
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 4));
+		//connection 1->3 should have been inherited from g2, as it is fitter
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
 		assertNotNull(c);
 		assertEquals(3, c.getWeight());
 		
-		//connection 2->3 should not have been inherited from g1, as it is not fitter
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 3));
+		//connection 1->2 should not have been inherited from g1, as it is not fitter
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
 		assertNull(c);
 		
 		//verify that we get the same results when g2 is the father instead of g1
@@ -716,7 +697,7 @@ public class Tests {
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
-		c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(0, 2));
 		assertNotNull(c);
 		
 		connectionIsCorrect = false;
@@ -725,11 +706,11 @@ public class Tests {
 		}
 		assertTrue(connectionIsCorrect);
 		
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 4));
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
 		assertNotNull(c);
 		assertEquals(3, c.getWeight());
 		
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(2, 3));
+		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
 		assertNull(c);
 	}
 	
@@ -742,7 +723,7 @@ public class Tests {
 		assertEquals(0.0, s.getMaxFitness());
 		
 		Genome g = s.getGenomes().get(4);
-		assertEquals(3, g.getNumberOfInputs());
+		assertEquals(2, g.getNumberOfInputs());
 		assertEquals(1, g.getNumberOfOutputs());
 		assertEquals(3, g.getConnectionGenes().size());
 	}
@@ -750,21 +731,20 @@ public class Tests {
 	@Test
 	public void testGlobalFunctionsTestXORFitness() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
+		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.INPUT);
-		g.addNode(4, Node.OUTPUT);
-		g.addNode(5, Node.HIDDEN);
-		g.addConnection(4, 5, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(4, 5));
-		g.addConnection(5, 5, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(5, 5));
-		g.addConnection(1, 4, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(1, 4));
-		g.addConnection(4, 4, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(4, 4));
-		g.addConnection(2, 4, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(2, 4));
-		g.addConnection(3, 4, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(1, 5, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(1, 5));
-		g.addConnection(3, 5, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(3, 5));
-		g.addConnection(5, 4, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(5, 4));
-		g.addConnection(2, 5, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(2, 5));
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		g.addConnection(3, 4, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(4, 4));
+		g.addConnection(0, 3, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g.addConnection(3, 3, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(3, 3));
+		g.addConnection(1, 3, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g.addConnection(0, 4, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(0, 4));
+		g.addConnection(2, 4, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g.addConnection(4, 3, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g.addConnection(1, 4, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(1, 4));
 
 		assertEquals(409.3571230831879, GlobalFunctions.testXORFitness(g), 0.00000000000001);
 	}
@@ -772,21 +752,20 @@ public class Tests {
 	@Test
 	public void testGlobalFunctionsRunXOR() {
 		Genome g = new Genome();
-		g.addNode(1, Node.BIAS);
+		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
-		g.addNode(3, Node.INPUT);
-		g.addNode(4, Node.OUTPUT);
-		g.addNode(5, Node.HIDDEN);
-		g.addConnection(4, 5, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(4, 5));
-		g.addConnection(5, 5, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(5, 5));
-		g.addConnection(1, 4, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(1, 4));
-		g.addConnection(4, 4, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(4, 4));
-		g.addConnection(2, 4, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(2, 4));
-		g.addConnection(3, 4, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(1, 5, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(1, 5));
-		g.addConnection(3, 5, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(3, 5));
-		g.addConnection(5, 4, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(5, 4));
-		g.addConnection(2, 5, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(2, 5));
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		g.addConnection(3, 4, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(4, 4));
+		g.addConnection(0, 3, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g.addConnection(3, 3, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(3, 3));
+		g.addConnection(1, 3, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(2, 3));
+		g.addConnection(0, 4, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(0, 4));
+		g.addConnection(2, 4, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(2, 4));
+		g.addConnection(4, 3, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g.addConnection(1, 4, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(1, 4));
 		
 		assertEquals(0.05248796662764476, GlobalFunctions.runXOR(g, 0, 0), 0.000000000000000001);
 		assertEquals(0.08756708774628402, GlobalFunctions.runXOR(g, 1, 1), 0.000000000000000001);
