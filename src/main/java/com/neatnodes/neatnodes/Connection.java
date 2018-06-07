@@ -12,7 +12,7 @@ public class Connection {
 		this.outNode = outNode;
 		this.weight = weight;
 		this.enabled = enabled;
-		this.innovationNumber = innovationNumber;
+		this.innovationNumber = innovationNumber; //we take an innovation number as an argument rather than generating it because we need to be able to pass in specific innovations from previous generations after the innovation numbers from the previous generation have already been reset
 	}
 
 	public double getWeight() {

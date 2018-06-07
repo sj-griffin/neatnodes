@@ -119,7 +119,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeCreate() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		assertEquals(0, g.getNumberOfInputs());
 		assertEquals(0, g.getNumberOfOutputs());
 		assertEquals(false, g.isFitnessMeasured());
@@ -130,7 +131,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeAddNode(){
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		assertEquals(2, g.getNodeGenes().size());
 		assertEquals(1, g.getNumberOfInputs());
@@ -177,7 +179,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeAddConnection() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.OUTPUT);
 		g.addConnection(1, 2, 5, true, 3);
@@ -209,7 +212,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeMutateWeights() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.OUTPUT);
 		g.addConnection(1, 2, 5, true, 1);
@@ -222,26 +226,27 @@ public class Tests {
 	
 	@Test
 	public void testGenomeNodeMutatation() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.OUTPUT);
-		g.addConnection(1, 2, 5, false, GlobalFunctions.getInnovationNumber(1, 2));
+		g.addConnection(1, 2, 5, false, iManager.getInnovationNumber(1, 2));
 		
 		g.nodeMutation();
 		
 		//nothing should happen if the connection is disabled
 		assertNull(g.getNode(3));
-		assertNull(g.getConnection(GlobalFunctions.getInnovationNumber(1, 3)));
-		assertNull(g.getConnection(GlobalFunctions.getInnovationNumber(3, 2)));
+		assertNull(g.getConnection(iManager.getInnovationNumber(1, 3)));
+		assertNull(g.getConnection(iManager.getInnovationNumber(3, 2)));
 		
-		g.getConnection(GlobalFunctions.getInnovationNumber(1, 2)).setEnabled(true);
+		g.getConnection(iManager.getInnovationNumber(1, 2)).setEnabled(true);
 		g.nodeMutation();
 		
 		//if the connection is enabled, the mutation should occur
 		Node newNode = g.getNode(3);
-		Connection oldConnection = g.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
-		Connection newConnection1 = g.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
-		Connection newConnection2 = g.getConnection(GlobalFunctions.getInnovationNumber(3, 2));
+		Connection oldConnection = g.getConnection(iManager.getInnovationNumber(1, 2));
+		Connection newConnection1 = g.getConnection(iManager.getInnovationNumber(1, 3));
+		Connection newConnection2 = g.getConnection(iManager.getInnovationNumber(3, 2));
 		
 		assertEquals(Node.HIDDEN, newNode.getType());
 		assertEquals(3, newNode.getLabel());
@@ -255,45 +260,47 @@ public class Tests {
 	
 	@Test
 	public void testGenomeLinkMutation() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
 		g.addNode(3, Node.OUTPUT);
 		g.addNode(4, Node.HIDDEN);
-		g.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
-		g.addConnection(1, 3, 1, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g.addConnection(2, 3, 1, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g.addConnection(0, 4, 1, true, GlobalFunctions.getInnovationNumber(0, 4));
-		g.addConnection(1, 4, 1, true, GlobalFunctions.getInnovationNumber(1, 4));
-		g.addConnection(2, 4, 1, true, GlobalFunctions.getInnovationNumber(2, 4));
-		g.addConnection(3, 4, 1, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(4, 4, 1, true, GlobalFunctions.getInnovationNumber(4, 4));
-		g.addConnection(3, 3, 1, true, GlobalFunctions.getInnovationNumber(3, 3));
+		g.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
+		g.addConnection(1, 3, 1, true, iManager.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 1, true, iManager.getInnovationNumber(2, 3));
+		g.addConnection(4, 3, 1, true, iManager.getInnovationNumber(4, 3));
+		g.addConnection(0, 4, 1, true, iManager.getInnovationNumber(0, 4));
+		g.addConnection(1, 4, 1, true, iManager.getInnovationNumber(1, 4));
+		g.addConnection(2, 4, 1, true, iManager.getInnovationNumber(2, 4));
+		g.addConnection(3, 4, 1, true, iManager.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, 1, true, iManager.getInnovationNumber(4, 4));
+		g.addConnection(3, 3, 1, true, iManager.getInnovationNumber(3, 3));
 		
 		//if every possible connection is already made, there should be no change
 		g.linkMutation();
 		assertEquals(10, g.getConnectionGenes().size());
 		
 		g.addNode(5, Node.INPUT);
-		g.addConnection(5, 3, 1, true, GlobalFunctions.getInnovationNumber(5, 3));
+		g.addConnection(5, 3, 1, true, iManager.getInnovationNumber(5, 3));
 		
 		//the mutation should create the connection 5 -> 4, as it is the only remaining connection that doesn't violate any rules
 		g.linkMutation();
 		assertEquals(12, g.getConnectionGenes().size());
-		assertNotNull(g.getConnection(GlobalFunctions.getInnovationNumber(5, 4)));
+		assertNotNull(g.getConnection(iManager.getInnovationNumber(5, 4)));
 	}
 	
 	@Test
 	public void testGenomeCloneGenome() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
 		g1.addNode(3, Node.HIDDEN);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 1, true, GlobalFunctions.getInnovationNumber(1, 2));
-		g1.addConnection(3, 2, 1, true, GlobalFunctions.getInnovationNumber(3, 2));
-		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 1, true, iManager.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 1, true, iManager.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		
 		g1.setFitness(100);
 		
@@ -308,10 +315,10 @@ public class Tests {
 		assertNotNull(g2.getNode(1));
 		assertNotNull(g2.getNode(2));
 		assertNotNull(g2.getNode(3));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(0, 2)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(1, 2)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(3, 2)));
-		assertNotNull(g2.getConnection(GlobalFunctions.getInnovationNumber(0, 3)));
+		assertNotNull(g2.getConnection(iManager.getInnovationNumber(0, 2)));
+		assertNotNull(g2.getConnection(iManager.getInnovationNumber(1, 2)));
+		assertNotNull(g2.getConnection(iManager.getInnovationNumber(3, 2)));
+		assertNotNull(g2.getConnection(iManager.getInnovationNumber(0, 3)));
 
 		//the new genome should be editable
 		assertFalse(g2.isFitnessMeasured());
@@ -319,7 +326,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeWriteInputs() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
 		g.addNode(3, Node.OUTPUT);
@@ -355,7 +363,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeReadOutputs() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(2, Node.INPUT);
 		g.addNode(3, Node.OUTPUT);
 		g.addNode(4, Node.OUTPUT);
@@ -370,14 +379,15 @@ public class Tests {
 	
 	@Test
 	public void testGenomeRun() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.OUTPUT);
 		g.addNode(3, Node.HIDDEN);
-		g.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
-		g.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
-		g.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
+		g.addConnection(3, 2, 3, true, iManager.getInnovationNumber(3, 2));
+		g.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		
 		HashMap<Integer, Double> inputs = new HashMap<Integer, Double>();
 		inputs.put(1, -0.55);
@@ -400,7 +410,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeReset() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.OUTPUT);
 		g.addNode(3, Node.HIDDEN);
@@ -419,7 +430,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeSetFitness() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.setFitness(25);
 		
 		assertTrue(g.isFitnessMeasured());
@@ -428,7 +440,8 @@ public class Tests {
 	
 	@Test
 	public void testGenomeGetFitness() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		
 		//method should fail if the fitness has not been set
 		Executable testBlock = () -> { g.getFitness(); };		
@@ -441,7 +454,8 @@ public class Tests {
 	//Species tests
 	@Test
 	public void testSpeciesCreate() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		Species s = new Species(g1, 100, 0);
 		
 		assertEquals(100, s.getMaxFitness());
@@ -452,21 +466,22 @@ public class Tests {
 	
 	@Test
 	public void testSpeciesAddGenome() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
 		g1.addNode(3, Node.HIDDEN);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
-		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
-		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, iManager.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		
 		Species s = new Species(g1, 100, 0);
 		
 		//if the genomes have a compatability distance less than the compatability threshold (default 1.0), the add should succeed
 		Genome g2 = g1.cloneGenome();
 		g2.addNode(4, Node.HIDDEN);
-		g2.addConnection(4, 3, 1, true, GlobalFunctions.getInnovationNumber(4, 3));
+		g2.addConnection(4, 3, 1, true, iManager.getInnovationNumber(4, 3));
 		
 		assertTrue(s.addGenome(g2));
 		ArrayList<Genome> genomes = s.getGenomes();
@@ -475,9 +490,9 @@ public class Tests {
 
 		//if the genomes have a compatability distance greater than the threshold, the add should fail
 		Genome g3 = g2.cloneGenome();
-		g3.addConnection(2, 3, 6, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g3.getConnection(GlobalFunctions.getInnovationNumber(1, 2)).setWeight(5);
-		g3.getConnection(GlobalFunctions.getInnovationNumber(0, 3)).setWeight(8);
+		g3.addConnection(2, 3, 6, true, iManager.getInnovationNumber(2, 3));
+		g3.getConnection(iManager.getInnovationNumber(1, 2)).setWeight(5);
+		g3.getConnection(iManager.getInnovationNumber(0, 3)).setWeight(8);
 		
 		assertFalse(s.addGenome(g3));
 		genomes = s.getGenomes();
@@ -496,14 +511,15 @@ public class Tests {
 	
 	@Test
 	public void testSpeciesCalculateAverageFitness(){
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
 		g1.addNode(3, Node.HIDDEN);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
-		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
-		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, iManager.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		Genome g2 = g1.cloneGenome();
 		Genome g3 = g1.cloneGenome();
 		Genome g4 = g1.cloneGenome();
@@ -524,14 +540,15 @@ public class Tests {
 	
 	@Test
 	public void testSpeciesGetAverageFitness() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
 		g1.addNode(3, Node.HIDDEN);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
-		g1.addConnection(3, 2, 3, true, GlobalFunctions.getInnovationNumber(3, 2));
-		g1.addConnection(0, 3, 1, true, GlobalFunctions.getInnovationNumber(0, 3));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
+		g1.addConnection(3, 2, 3, true, iManager.getInnovationNumber(3, 2));
+		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		g1.setFitness(30);
 
 		Species s = new Species(g1, 30, 0);
@@ -548,10 +565,11 @@ public class Tests {
 	
 	@Test
 	public void testSpeciesCull() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
-		g1.addConnection(1, 2, 1, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(1, 2, 1, true, iManager.getInnovationNumber(1, 2));
 		g1.setFitness(45);
 		
 		Species s = new Species(g1, 131, 5);
@@ -624,26 +642,27 @@ public class Tests {
 	
 	@Test
 	public void testGlobalFunctionsCalculateCompatabilityDistance() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
 		
 		//g2 has an excess gene, and a gene with a weight difference of 3.5. g1 has a disjoint gene.
-		Genome g2 = new Genome();
+		Genome g2 = new Genome(iManager);
 		g2.addNode(1, Node.INPUT);
 		g2.addNode(2, Node.OUTPUT);
 		g2.addNode(3, Node.HIDDEN);
-		g2.addConnection(0, 2, 4.5, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g2.addConnection(1, 3, 3, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g2.addConnection(0, 2, 4.5, true, iManager.getInnovationNumber(0, 2));
+		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		
 		double result = GlobalFunctions.calculateCompatabilityDistance(g1, g2);
 		
 		assertEquals(2.4, result, 0.000000001);
 		
-		Genome g3 = new Genome();
-		Genome g4 = new Genome();
+		Genome g3 = new Genome(iManager);
+		Genome g4 = new Genome(iManager);
 		
 		//the calculation should throw an exception if either genome is empty
 		Executable testBlock = () -> { GlobalFunctions.calculateCompatabilityDistance(g3, g4); };		
@@ -652,29 +671,30 @@ public class Tests {
 	
 	@Test
 	public void testGlobalFunctionsBreed() {
-		Genome g1 = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
-		g1.addConnection(0, 2, 1, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g1.addConnection(1, 2, 2, true, GlobalFunctions.getInnovationNumber(1, 2));
+		g1.addConnection(0, 2, 1, true, iManager.getInnovationNumber(0, 2));
+		g1.addConnection(1, 2, 2, true, iManager.getInnovationNumber(1, 2));
 		g1.setFitness(10);
 		
 		//g2 has an excess gene, a disjoint gene, a matching gene with a weight difference, and a greater fitness
-		Genome g2 = new Genome();
+		Genome g2 = new Genome(iManager);
 		g2.addNode(1, Node.INPUT);
 		g2.addNode(2, Node.OUTPUT);
 		g2.addNode(3, Node.HIDDEN);
-		g2.addConnection(0, 2, 4.5, true, GlobalFunctions.getInnovationNumber(0, 2));
-		g2.addConnection(1, 3, 3, true, GlobalFunctions.getInnovationNumber(1, 3));
+		g2.addConnection(0, 2, 4.5, true, iManager.getInnovationNumber(0, 2));
+		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		g2.setFitness(20);
 		
-		Genome offspring = GlobalFunctions.breed(g1, g2);
+		Genome offspring = GlobalFunctions.breed(g1, g2, iManager);
 		
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
 		//connection 0->2 should have been inherited from either g1 or g2
-		Connection c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(0, 2));
+		Connection c  = offspring.getConnection(iManager.getInnovationNumber(0, 2));
 		assertNotNull(c);
 		
 		boolean connectionIsCorrect = false;
@@ -684,20 +704,20 @@ public class Tests {
 		assertTrue(connectionIsCorrect);
 		
 		//connection 1->3 should have been inherited from g2, as it is fitter
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		c = offspring.getConnection(iManager.getInnovationNumber(1, 3));
 		assertNotNull(c);
 		assertEquals(3, c.getWeight());
 		
 		//connection 1->2 should not have been inherited from g1, as it is not fitter
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
+		c = offspring.getConnection(iManager.getInnovationNumber(1, 2));
 		assertNull(c);
 		
 		//verify that we get the same results when g2 is the father instead of g1
-		offspring = GlobalFunctions.breed(g2, g1);
+		offspring = GlobalFunctions.breed(g2, g1, iManager);
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
-		c  = offspring.getConnection(GlobalFunctions.getInnovationNumber(0, 2));
+		c  = offspring.getConnection(iManager.getInnovationNumber(0, 2));
 		assertNotNull(c);
 		
 		connectionIsCorrect = false;
@@ -706,17 +726,18 @@ public class Tests {
 		}
 		assertTrue(connectionIsCorrect);
 		
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 3));
+		c = offspring.getConnection(iManager.getInnovationNumber(1, 3));
 		assertNotNull(c);
 		assertEquals(3, c.getWeight());
 		
-		c = offspring.getConnection(GlobalFunctions.getInnovationNumber(1, 2));
+		c = offspring.getConnection(iManager.getInnovationNumber(1, 2));
 		assertNull(c);
 	}
 	
 	@Test
 	public void testGlobalFunctionsSetupInitialSpecies() {
-		Species s = GlobalFunctions.setupInitialSpecies(5);
+		InnovationManager iManager = new InnovationManager();
+		Species s = GlobalFunctions.setupInitialSpecies(5, iManager);
 		assertEquals(5, s.getGenomes().size());
 		assertFalse(s.isFinalised());
 		assertEquals(0, s.getGenerationsWithoutImprovement());
@@ -730,42 +751,44 @@ public class Tests {
 	
 	@Test
 	public void testGlobalFunctionsTestXORFitness() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
 		g.addNode(3, Node.OUTPUT);
 		g.addNode(4, Node.HIDDEN);
-		g.addConnection(3, 4, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(4, 4, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(4, 4));
-		g.addConnection(0, 3, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(0, 3));
-		g.addConnection(3, 3, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(3, 3));
-		g.addConnection(1, 3, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g.addConnection(2, 3, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g.addConnection(0, 4, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(0, 4));
-		g.addConnection(2, 4, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(2, 4));
-		g.addConnection(4, 3, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g.addConnection(1, 4, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addConnection(3, 4, 1.37168818659685, true, iManager.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, -1.9866023632803813, true, iManager.getInnovationNumber(4, 4));
+		g.addConnection(0, 3, 0.5173581564297121, true, iManager.getInnovationNumber(0, 3));
+		g.addConnection(3, 3, -1.6909665002259813, true, iManager.getInnovationNumber(3, 3));
+		g.addConnection(1, 3, 0.6210336565818149, true, iManager.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 0.973834515119807, true, iManager.getInnovationNumber(2, 3));
+		g.addConnection(0, 4, -0.6742458822719644, true, iManager.getInnovationNumber(0, 4));
+		g.addConnection(2, 4, 1.0724675677107962, true, iManager.getInnovationNumber(2, 4));
+		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
+		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 
 		assertEquals(409.3571230831879, GlobalFunctions.testXORFitness(g), 0.00000000000001);
 	}
 	
 	@Test
 	public void testGlobalFunctionsRunXOR() {
-		Genome g = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
 		g.addNode(3, Node.OUTPUT);
 		g.addNode(4, Node.HIDDEN);
-		g.addConnection(3, 4, 1.37168818659685, true, GlobalFunctions.getInnovationNumber(3, 4));
-		g.addConnection(4, 4, -1.9866023632803813, true, GlobalFunctions.getInnovationNumber(4, 4));
-		g.addConnection(0, 3, 0.5173581564297121, true, GlobalFunctions.getInnovationNumber(0, 3));
-		g.addConnection(3, 3, -1.6909665002259813, true, GlobalFunctions.getInnovationNumber(3, 3));
-		g.addConnection(1, 3, 0.6210336565818149, true, GlobalFunctions.getInnovationNumber(1, 3));
-		g.addConnection(2, 3, 0.973834515119807, true, GlobalFunctions.getInnovationNumber(2, 3));
-		g.addConnection(0, 4, -0.6742458822719644, true, GlobalFunctions.getInnovationNumber(0, 4));
-		g.addConnection(2, 4, 1.0724675677107962, true, GlobalFunctions.getInnovationNumber(2, 4));
-		g.addConnection(4, 3, -1.1832390685857468, true, GlobalFunctions.getInnovationNumber(4, 3));
-		g.addConnection(1, 4, -1.0264579235753712, true, GlobalFunctions.getInnovationNumber(1, 4));
+		g.addConnection(3, 4, 1.37168818659685, true, iManager.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, -1.9866023632803813, true, iManager.getInnovationNumber(4, 4));
+		g.addConnection(0, 3, 0.5173581564297121, true, iManager.getInnovationNumber(0, 3));
+		g.addConnection(3, 3, -1.6909665002259813, true, iManager.getInnovationNumber(3, 3));
+		g.addConnection(1, 3, 0.6210336565818149, true, iManager.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 0.973834515119807, true, iManager.getInnovationNumber(2, 3));
+		g.addConnection(0, 4, -0.6742458822719644, true, iManager.getInnovationNumber(0, 4));
+		g.addConnection(2, 4, 1.0724675677107962, true, iManager.getInnovationNumber(2, 4));
+		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
+		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 		
 		assertEquals(0.05248796662764476, GlobalFunctions.runXOR(g, 0, 0), 0.000000000000000001);
 		assertEquals(0.08756708774628402, GlobalFunctions.runXOR(g, 1, 1), 0.000000000000000001);
@@ -792,23 +815,31 @@ public class Tests {
 	
 	//InnovationManager tests
 	@Test
-	public void testInnovationManagerCreate() {
+	public void testInnovationManagerGetInnovationNumber() {
+		InnovationManager iManager = new InnovationManager();
+		//the same combination of inputs should always produce the same innovation number as the first time they were entered as long as a new generation hasn't been started
+		assertEquals(1, iManager.getInnovationNumber(3, 5));
+		assertEquals(1, iManager.getInnovationNumber(3, 5));
 		
+		assertEquals(2, iManager.getInnovationNumber(8, 2));
+		assertEquals(1, iManager.getInnovationNumber(3, 5));
+		assertEquals(2, iManager.getInnovationNumber(8, 2));
 	}
 	
 	@Test
 	public void testInnovationManagerNewGeneration() {
+		InnovationManager iManager = new InnovationManager();
+		iManager.getInnovationNumber(3, 5);
+		iManager.getInnovationNumber(1, 2);
+		iManager.getInnovationNumber(2, 8);
+		iManager.getInnovationNumber(6, 6);
+		iManager.newGeneration();
 		
-	}
-	
-	@Test
-	public void testInnovationManagerAddInnovation() {
+		//after a new generation has been started, entering inputs that have already been assigned an innovation number should produce a new innovation number
+		assertEquals(5, iManager.getInnovationNumber(2, 8));
 		
-	}
-	
-	@Test
-	public void testInnovationManagerGetInnovationNumber() {
-		
+		//the same inputs should then produce the same innovation number for the duration of this generation
+		assertEquals(5, iManager.getInnovationNumber(2, 8));
 	}
 	
 	//JSONTools tests

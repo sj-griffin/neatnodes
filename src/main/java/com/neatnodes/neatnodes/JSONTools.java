@@ -96,7 +96,8 @@ public class JSONTools {
 	
 	//take a json file and produce a new genome from the information in it
 	public static Genome readGenomeFromFile(File f){
-		Genome output = new Genome();
+		InnovationManager iManager = new InnovationManager();
+		Genome output = new Genome(iManager);
 		String asString = null;
 		try{
 			BufferedReader br = new BufferedReader(new FileReader(f));
@@ -134,7 +135,7 @@ public class JSONTools {
 				double weight = connections.getJSONObject(i).getDouble("weight");
 				int inNode = connections.getJSONObject(i).getInt("inNode");
 				int outNode = connections.getJSONObject(i).getInt("outNode");
-				output.addConnection(inNode, outNode, weight, true, GlobalFunctions.getInnovationNumber(inNode,outNode));;
+				output.addConnection(inNode, outNode, weight, true, iManager.getInnovationNumber(inNode,outNode));;
 			}
 		}
 		catch(JSONException e){

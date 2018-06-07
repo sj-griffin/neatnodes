@@ -15,8 +15,11 @@ public class Genome {
 	private double fitness; //the fitness of the genome for its purpose
 	private boolean fitnessMeasured; //true if fitness has been measured. Once fitness has been measured, the genome is locked and no further changes to its design can occur.
 	
+	private InnovationManager iManager; //the InnovationManager to retrieve innovation numbers from
+	
 	//when creating a genome, only input, hidden and output nodes need to be added manually. The bias node will be created automatically. However, the bias node must be manually connected to other nodes.
-	public Genome(){
+	public Genome(InnovationManager iManager){
+		this.iManager = iManager;
 		nodeGenes = new HashMap<Integer, Node>();
 		connectionGenes = new HashMap<Integer, Connection>();
 		numberOfInputs = 0;
@@ -86,6 +89,7 @@ public class Genome {
 	
 	//adds a new connection defined by the arguments and returns true if successful
 	//in and out nodes are defined by their number in the genome to ensure that the nodes exist in the genome
+	//we take an innovation number as an argument rather than generating it because we need to be able to pass in specific innovation numbers from previous generations after the innovations from the previous generation have already been reset
 	public void addConnection(int inNodeNumber, int outNodeNumber, double weight, boolean enabled, int innovationNumber){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
@@ -166,8 +170,8 @@ public class Genome {
 		addNode(newNodeNumber, Node.HIDDEN);
 		
 		//add two new connections in place of the disabled one
-		addConnection(randomConnection.getInNode().getLabel(), newNodeNumber, 1.0, true, GlobalFunctions.getInnovationNumber(randomConnection.getInNode().getLabel(), newNodeNumber));
-		addConnection(newNodeNumber, randomConnection.getOutNode().getLabel(), randomConnection.getWeight(), true, GlobalFunctions.getInnovationNumber(newNodeNumber, randomConnection.getOutNode().getLabel()));
+		addConnection(randomConnection.getInNode().getLabel(), newNodeNumber, 1.0, true, iManager.getInnovationNumber(randomConnection.getInNode().getLabel(), newNodeNumber));
+		addConnection(newNodeNumber, randomConnection.getOutNode().getLabel(), randomConnection.getWeight(), true, iManager.getInnovationNumber(newNodeNumber, randomConnection.getOutNode().getLabel()));
 	}
 	
 	protected void linkMutation(){
@@ -209,7 +213,7 @@ public class Genome {
 			//Note that recurrent connections (where a node connects to itself) are permitted
 			
 			//if all conditions have been met, add the connection and break out of the loop
-			addConnection(randomNode1.getLabel(), randomNode2.getLabel(), Math.random()*4-2, true, GlobalFunctions.getInnovationNumber(randomNode1.getLabel(), randomNode2.getLabel()));
+			addConnection(randomNode1.getLabel(), randomNode2.getLabel(), Math.random()*4-2, true, iManager.getInnovationNumber(randomNode1.getLabel(), randomNode2.getLabel()));
 			break;
 		}
 	}
@@ -228,7 +232,7 @@ public class Genome {
 	
 	//returns a clone of this genome with all the same nodes and connections represented by new objects. The new genome will have no fitness and be open for editing even if this one has already been locked.
 	public Genome cloneGenome(){
-		Genome newGenome = new Genome();
+		Genome newGenome = new Genome(iManager);
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
 
 			Node n = node.getValue();

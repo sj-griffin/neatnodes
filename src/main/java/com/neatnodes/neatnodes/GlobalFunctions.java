@@ -24,46 +24,11 @@ public class GlobalFunctions {
 	
 	public static final int initialPopulationSize = 150;
 	
-	public static final int numberOfGenerations = 1500; // the number of generations to run the simulation for
+	public static final int numberOfGenerations = 1000; // the number of generations to run the simulation for
 	
 	public static final double crossoverProportion = 0.75; //the fraction of offspring which are created by crossing two genomes. The rest are cloned from a single genome.
 	
 	public static final int depth = 3; //controls the number of cycles to run each genome for before reading a result. It is the equivalent of the "depth" in a feed-forward network
-	
-	private static int globalInnovationNumber = 1; //used to track gene history
-	
-	private static ArrayList<Innovation> currentInnovations = new ArrayList<Innovation>();
-	
-	//reset the list of innovations for a new generation
-	public static void newGeneration(){
-		currentInnovations = new ArrayList<Innovation>();
-	}
-	
-	//add an innovation to the list of innovations for the current generation
-	public static void addInnovation(Innovation i){
-		currentInnovations.add(i);
-	}
-	
-	/**
-	*checks to see if the connection defined by the two nodes is equivalent to an existing innovation from the current generation
-	*if it is, return its innovation number
-	*if not, return the global innovation number and add it to the list of innovations
-	*
-	*WARNING: be careful using this method when setting up the initial genomes. Make sure equivalent nodes are actually numbered the same or it will stuff up the whole run.
-	**/
-	public static int getInnovationNumber(int inNodeLabel, int outNodeLabel){
-		for(int i = 0; i < currentInnovations.size(); i++){
-			if(currentInnovations.get(i).isEquivalent(inNodeLabel, outNodeLabel)){
-				return currentInnovations.get(i).getInnovationNumber();
-			}
-		}
-		
-		//if the innovation is new, record it and assign it a new innovation number
-		globalInnovationNumber ++;
-		currentInnovations.add(new Innovation(globalInnovationNumber, inNodeLabel, outNodeLabel));
-		return globalInnovationNumber;
-	}
-	
 	
 	/**return the compatability distance between two genomes
 	*key variables:
@@ -177,8 +142,8 @@ public class GlobalFunctions {
 	}
 	
 	//breed two genomes and return their offspring
-	public static Genome breed(Genome father, Genome mother){
-		Genome offspring = new Genome();
+	public static Genome breed(Genome father, Genome mother, InnovationManager iManager){
+		Genome offspring = new Genome(iManager);
 		
 		//fail if the fitness of either parent has not been set
 		if(!father.isFitnessMeasured() || !mother.isFitnessMeasured()){
@@ -300,14 +265,14 @@ public class GlobalFunctions {
 	//set up an initial population of genomes with 2 inputs and 1 output in an initial species
 	//we start with a uniform population with no hidden nodes
 	//takes a populationSize which is the number of genomes to create
-	public static Species setupInitialSpecies(int populationSize) {
-		Genome baseGenome = new Genome();
+	public static Species setupInitialSpecies(int populationSize, InnovationManager iManager) {
+		Genome baseGenome = new Genome(iManager);
 		baseGenome.addNode(1, Node.INPUT);
 		baseGenome.addNode(2, Node.INPUT);
 		baseGenome.addNode(3, Node.OUTPUT);
-		baseGenome.addConnection(0, 3, 1.0, true, GlobalFunctions.getInnovationNumber(0,3));
-		baseGenome.addConnection(1, 3, 1.0, true, GlobalFunctions.getInnovationNumber(1,3));
-		baseGenome.addConnection(2, 3, 1.0, true, GlobalFunctions.getInnovationNumber(2,3));
+		baseGenome.addConnection(0, 3, 1.0, true, iManager.getInnovationNumber(0,3));
+		baseGenome.addConnection(1, 3, 1.0, true, iManager.getInnovationNumber(1,3));
+		baseGenome.addConnection(2, 3, 1.0, true, iManager.getInnovationNumber(2,3));
 		
 		Species result = new Species(baseGenome, 0.0, 0);
 		
@@ -403,10 +368,11 @@ public class GlobalFunctions {
 	}
 	
 	public static void runSimulation() {
+		InnovationManager iManager = new InnovationManager();
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		
 		//setup an initial uniform population in an initial species
-		allSpecies.add(GlobalFunctions.setupInitialSpecies(GlobalFunctions.initialPopulationSize));
+		allSpecies.add(GlobalFunctions.setupInitialSpecies(GlobalFunctions.initialPopulationSize, iManager));
 		
 		Genome globalChampion = null;
 		
@@ -458,10 +424,10 @@ public class GlobalFunctions {
 				//perform the breeding
 				for(int j = 0; j < numberOfOffspring; j ++){
 					if(j < numberOfCrossovers){
-						nextGeneration.add(currentSpecies.produceOffspring(true));
+						nextGeneration.add(currentSpecies.produceOffspring(true, iManager));
 					}
 					else{
-						nextGeneration.add(currentSpecies.produceOffspring(false));
+						nextGeneration.add(currentSpecies.produceOffspring(false, iManager));
 					}
 				}
 			}
@@ -512,7 +478,7 @@ public class GlobalFunctions {
 			System.out.println("New generation sorted into species. Resetting innovations.");
 
 			//reset the record of innovations for a new generation
-			GlobalFunctions.newGeneration();
+			iManager.newGeneration();
 		}
 		
 		//print the results produced by the best genome

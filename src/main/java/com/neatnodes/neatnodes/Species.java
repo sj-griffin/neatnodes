@@ -83,7 +83,7 @@ public class Species {
 	}
 	
 	//returns an offspring bred and mutated from the species. If crossover is true, two random members will be bred , if not a single member will be bred with itself
-	public Genome produceOffspring(boolean crossover){
+	public Genome produceOffspring(boolean crossover, InnovationManager iManager){
 		//fail if the species has not been finalised yet
 		if(!finalised){
 			throw new GenomeException();
@@ -100,7 +100,7 @@ public class Species {
 		}
 		
 		//breed them and apply a mutation to the offspring
-		Genome offspring = GlobalFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex));
+		Genome offspring = GlobalFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex), iManager);
 		offspring.mutate();
 		
 		return offspring;
