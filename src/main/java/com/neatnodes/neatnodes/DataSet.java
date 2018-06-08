@@ -21,17 +21,8 @@ public class DataSet {
 	public DataSet(String pathToCSV) throws DataFormatException{
 	    int inputNumber = 0;
 	    int outputNumber = 0;
-		try {
-			final CSVParser parser =
-					new CSVParserBuilder()
-					.withSeparator(',')
-					.withIgnoreQuotations(true)
-					.build();
-			final CSVReader reader =
-					new CSVReaderBuilder(new FileReader(pathToCSV))
-					.withCSVParser(parser)
-					.build();
-			
+		CSVParser parser = new CSVParserBuilder().withSeparator(',').withIgnoreQuotations(true).build();
+		try (CSVReader reader = new CSVReaderBuilder(new FileReader(pathToCSV)).withCSVParser(parser).build()){
 		     String [] nextLine = reader.readNext();
 		     if (nextLine == null || nextLine.length < 1) {
 		    	 throw new DataFormatException("No CSV header row found");
@@ -63,18 +54,22 @@ public class DataSet {
 		     }
 		     
 		     //parse the data rows
-		     while ((nextLine = reader.readNext()) != null) {
+		    while ((nextLine = reader.readNext()) != null) {
+		    	if((inputNumber + outputNumber) != nextLine.length) {
+		    		throw new DataFormatException("CSV file is not formatted correctly. Entries do not align with column headers.");
+		    	}
 		        this.entries.add(new Double[ inputNumber + outputNumber ]);
 		        for(int i = 0; i < nextLine.length; i ++) {
 		        	try {
 		        		this.entries.get(entries.size() - 1)[i] = Double.parseDouble(nextLine[i]);
 		        	}
 		        	catch(NumberFormatException e) {
-		        		System.out.println(nextLine[i]);
 		        		throw new DataFormatException("CSV file is not formatted correctly. All values must be numbers and cannot be blank.");
 		        	}
 		        }
-		     }
+		    }
+		    
+		    reader.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -98,8 +93,15 @@ public class DataSet {
 		return entries.size();
 	}
 
+	//returns null if the supplied row number is invalid
 	public Double[] getInputsForRow(int rowNumber) {
-		Double[] row = this.entries.get(rowNumber);
+		Double[] row = null;
+		try {
+			row = this.entries.get(rowNumber);
+		}
+		catch(IndexOutOfBoundsException e) {
+			return null;
+		}
 		Double[] returnValue = new Double[this.inputs];
 		for(int i = 0; i < this.inputs; i ++) {
 			returnValue[i] = row[i];
@@ -107,22 +109,18 @@ public class DataSet {
 		return returnValue;
 	}
 	
+	//returns null if the supplied row number is invalid
 	public Double[] getOutputsForRow(int rowNumber) {
-		Double[] row = this.entries.get(rowNumber);
-		Double[] returnValue = new Double[this.outputs];
+		Double[] row = null;
+		try {
+			row = this.entries.get(rowNumber);
+		}
+		catch(IndexOutOfBoundsException e) {
+			return null;
+		}		Double[] returnValue = new Double[this.outputs];
 		for(int i = 0; i < this.outputs; i ++) {
 			returnValue[i] = row[i + this.inputs];
 		}
 		return returnValue;
-	}
-
-	public static void main(String args[]) {
-		
-		try {
-			DataSet ds = new DataSet("test.csv");
-		} catch (DataFormatException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
 	}
 }

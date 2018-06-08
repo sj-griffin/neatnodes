@@ -2,8 +2,16 @@ package com.neatnodes.neatnodes;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.DataFormatException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -845,27 +853,535 @@ public class Tests {
 	//JSONTools tests
 	@Test
 	public void testJSONToolsWriteGenomeToFile() {
+		InnovationManager iManager = new InnovationManager();
+		Genome g = new Genome(iManager);
+		g.addNode(1, Node.INPUT);
+		g.addNode(2, Node.INPUT);
+		g.addNode(3, Node.OUTPUT);
+		g.addNode(4, Node.HIDDEN);
+		g.addConnection(3, 4, 1.37168818659685, true, iManager.getInnovationNumber(3, 4));
+		g.addConnection(4, 4, -1.9866023632803813, true, iManager.getInnovationNumber(4, 4));
+		g.addConnection(0, 3, 0.5173581564297121, true, iManager.getInnovationNumber(0, 3));
+		g.addConnection(3, 3, -1.6909665002259813, true, iManager.getInnovationNumber(3, 3));
+		g.addConnection(1, 3, 0.6210336565818149, true, iManager.getInnovationNumber(1, 3));
+		g.addConnection(2, 3, 0.973834515119807, true, iManager.getInnovationNumber(2, 3));
+		g.addConnection(0, 4, -0.6742458822719644, true, iManager.getInnovationNumber(0, 4));
+		g.addConnection(2, 4, 1.0724675677107962, true, iManager.getInnovationNumber(2, 4));
+		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		
+		//connections that are disabled should be ignored and not appear in the file
+		g.addConnection(1, 4, -1.0264579235753712, false, iManager.getInnovationNumber(1, 4));
+
+		
+		JSONTools.writeGenomeToFile(g, "./testGenomeWrite.json", "This is a comment");
+		
+		String asString = null;
+		File f = new File("./testGenomeWrite.json");
+		try{
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			String line;
+			StringBuilder sb = new StringBuilder();
+			String ls = System.getProperty("line.separator");
+			while((line = br.readLine()) != null){
+				sb.append(line);
+				sb.append(ls);
+			}
+			
+			asString = sb.toString();
+			br.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		assertEquals("{\r\n" + 
+				"	\"genome\": {\r\n" + 
+				"		\"comment\": \"This is a comment\",\r\n" + 
+				"		\"nodes\": [\r\n" + 
+				"			{\r\n" + 
+				"				\"type\": 4,\r\n" + 
+				"				\"label\": 0\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"type\": 1,\r\n" + 
+				"				\"label\": 1\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"type\": 1,\r\n" + 
+				"				\"label\": 2\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"type\": 2,\r\n" + 
+				"				\"label\": 3\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"type\": 3,\r\n" + 
+				"				\"label\": 4\r\n" + 
+				"			}\r\n" + 
+				"		],\r\n" + 
+				"		\"connections\": [\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": 1.37168818659685,\r\n" + 
+				"				\"inNode\": 3,\r\n" + 
+				"				\"outNode\": 4\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": -1.9866023632803813,\r\n" + 
+				"				\"inNode\": 4,\r\n" + 
+				"				\"outNode\": 4\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": 0.5173581564297121,\r\n" + 
+				"				\"inNode\": 0,\r\n" + 
+				"				\"outNode\": 3\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": -1.6909665002259813,\r\n" + 
+				"				\"inNode\": 3,\r\n" + 
+				"				\"outNode\": 3\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": 0.6210336565818149,\r\n" + 
+				"				\"inNode\": 1,\r\n" + 
+				"				\"outNode\": 3\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": 0.973834515119807,\r\n" + 
+				"				\"inNode\": 2,\r\n" + 
+				"				\"outNode\": 3\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": -0.6742458822719644,\r\n" + 
+				"				\"inNode\": 0,\r\n" + 
+				"				\"outNode\": 4\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": 1.0724675677107962,\r\n" + 
+				"				\"inNode\": 2,\r\n" + 
+				"				\"outNode\": 4\r\n" + 
+				"			},\r\n" + 
+				"			{\r\n" + 
+				"				\"weight\": -1.1832390685857468,\r\n" + 
+				"				\"inNode\": 4,\r\n" + 
+				"				\"outNode\": 3\r\n" + 
+				"			}\r\n" + 
+				"		]\r\n" + 
+				"	}\r\n" + 
+				"}\r\n" + 
+				"", asString);
+		
+	    f.delete();
 	}
 	
 	@Test
 	public void testJSONToolsReadGenomeFromFile() {
+		File f = new File("./testGenomeRead.json");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("{\r\n" + 
+					"	\"genome\": {\r\n" + 
+					"		\"comment\": \"This is a comment\",\r\n" + 
+					"		\"nodes\": [\r\n" + 
+					"			{\r\n" + 
+					"				\"type\": 4,\r\n" + 
+					"				\"label\": 0\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"type\": 1,\r\n" + 
+					"				\"label\": 1\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"type\": 1,\r\n" + 
+					"				\"label\": 2\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"type\": 2,\r\n" + 
+					"				\"label\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"type\": 3,\r\n" + 
+					"				\"label\": 4\r\n" + 
+					"			}\r\n" + 
+					"		],\r\n" + 
+					"		\"connections\": [\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": 1.37168818659685,\r\n" + 
+					"				\"inNode\": 3,\r\n" + 
+					"				\"outNode\": 4\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": -1.9866023632803813,\r\n" + 
+					"				\"inNode\": 4,\r\n" + 
+					"				\"outNode\": 4\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": 0.5173581564297121,\r\n" + 
+					"				\"inNode\": 0,\r\n" + 
+					"				\"outNode\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": -1.6909665002259813,\r\n" + 
+					"				\"inNode\": 3,\r\n" + 
+					"				\"outNode\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": 0.6210336565818149,\r\n" + 
+					"				\"inNode\": 1,\r\n" + 
+					"				\"outNode\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": 0.973834515119807,\r\n" + 
+					"				\"inNode\": 2,\r\n" + 
+					"				\"outNode\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": -0.6742458822719644,\r\n" + 
+					"				\"inNode\": 0,\r\n" + 
+					"				\"outNode\": 4\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": 1.0724675677107962,\r\n" + 
+					"				\"inNode\": 2,\r\n" + 
+					"				\"outNode\": 4\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": -1.1832390685857468,\r\n" + 
+					"				\"inNode\": 4,\r\n" + 
+					"				\"outNode\": 3\r\n" + 
+					"			},\r\n" + 
+					"			{\r\n" + 
+					"				\"weight\": -1.0264579235753712,\r\n" + 
+					"				\"inNode\": 1,\r\n" + 
+					"				\"outNode\": 4\r\n" + 
+					"			}\r\n" + 
+					"		]\r\n" + 
+					"	}\r\n" + 
+					"}\r\n" + 
+					"");
+			
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
+		Genome g = JSONTools.readGenomeFromFile("./testGenomeRead.json");
+		assertEquals(5, g.getNodeGenes().size());
+		assertEquals(10, g.getConnectionGenes().size());
+		assertFalse(g.isFitnessMeasured());
+		assertEquals(2, g.getNumberOfInputs());
+		assertEquals(1, g.getNumberOfOutputs());
+		assertEquals(Node.BIAS, g.getNode(0).getType());
+		assertEquals(Node.INPUT, g.getNode(1).getType());
+		assertEquals(Node.INPUT, g.getNode(2).getType());
+		assertEquals(Node.OUTPUT, g.getNode(3).getType());
+		assertEquals(Node.HIDDEN, g.getNode(4).getType());
+		
+		assertEquals(3, g.getConnection(1).getInNode().getLabel());
+		assertEquals(4, g.getConnection(1).getOutNode().getLabel());
+		assertEquals(1.37168818659685, g.getConnection(1).getWeight());
+		
+		assertEquals(4, g.getConnection(2).getInNode().getLabel());
+		assertEquals(4, g.getConnection(2).getOutNode().getLabel());
+		assertEquals(-1.9866023632803813, g.getConnection(2).getWeight());
+		
+		assertEquals(0, g.getConnection(3).getInNode().getLabel());
+		assertEquals(3, g.getConnection(3).getOutNode().getLabel());
+		assertEquals(0.5173581564297121, g.getConnection(3).getWeight());
+		
+		assertEquals(3, g.getConnection(4).getInNode().getLabel());
+		assertEquals(3, g.getConnection(4).getOutNode().getLabel());
+		assertEquals(-1.6909665002259813, g.getConnection(4).getWeight());
+		
+		assertEquals(1, g.getConnection(5).getInNode().getLabel());
+		assertEquals(3, g.getConnection(5).getOutNode().getLabel());
+		assertEquals(0.6210336565818149, g.getConnection(5).getWeight());
+		
+		assertEquals(2, g.getConnection(6).getInNode().getLabel());
+		assertEquals(3, g.getConnection(6).getOutNode().getLabel());
+		assertEquals(0.973834515119807, g.getConnection(6).getWeight());
+		
+		assertEquals(0, g.getConnection(7).getInNode().getLabel());
+		assertEquals(4, g.getConnection(7).getOutNode().getLabel());
+		assertEquals(-0.6742458822719644, g.getConnection(7).getWeight());
+		
+		assertEquals(2, g.getConnection(8).getInNode().getLabel());
+		assertEquals(4, g.getConnection(8).getOutNode().getLabel());
+		assertEquals(1.0724675677107962, g.getConnection(8).getWeight());
+		
+		assertEquals(4, g.getConnection(9).getInNode().getLabel());
+		assertEquals(3, g.getConnection(9).getOutNode().getLabel());
+		assertEquals(-1.1832390685857468, g.getConnection(9).getWeight());
+		
+		assertEquals(1, g.getConnection(10).getInNode().getLabel());
+		assertEquals(4, g.getConnection(10).getOutNode().getLabel());
+		assertEquals(-1.0264579235753712, g.getConnection(10).getWeight());
+		
+	    f.delete();
 	}
 	
 	//DataSet tests
 	@Test
 	public void testDataSetCreate() {
+		File f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"0,0,0\r\n" + 
+					"1,1,0\r\n" + 
+					"0,1,1\r\n" + 
+					"1,0,1\r\n" + 
+					"2,3,5\r\n" + 
+					"4,4,4\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
+		DataSet d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(6, d.getNumberOfEntries());
+		assertEquals(2, d.getInputNumber());
+		assertEquals(1, d.getOutputNumber());
+		
+		//create should fail if the csv file is empty
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		Executable testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+		//create should fail if there are no inputs
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("output\r\n" + 
+					"0\r\n" +  
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+		//create should fail if there are no outputs
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input\r\n" + 
+					"0\r\n" +  
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+		//create should fail if all inputs do not occur before all outputs
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,output,input\r\n" + 
+					"0,0,0\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("output,input\r\n" + 
+					"0,0\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+	    //create should fail if entries do not align with column headers
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"0,0,1,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"0,0\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+	    //create should fail if the file contains non-numeric data
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"0,a string,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+	    f.delete();
 	}
 	
 	@Test
-	public void testDataSetGetInputsForROw() {
+	public void testDataSetGetInputsForRow() {
+		File f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"1,1,0\r\n" + 
+					"2,3,5\r\n" + 
+					"4,4,4\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
+		DataSet d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(2, d.getInputsForRow(0).length);
+		assertEquals(1, d.getInputsForRow(0)[0], 0.00000000001);
+		assertEquals(1, d.getInputsForRow(0)[1], 0.00000000001);
+		
+		assertEquals(2, d.getInputsForRow(1).length);
+		assertEquals(2, d.getInputsForRow(1)[0], 0.00000000001);
+		assertEquals(3, d.getInputsForRow(1)[1], 0.00000000001);
+		
+		assertEquals(2, d.getInputsForRow(2).length);
+		assertEquals(4, d.getInputsForRow(2)[0], 0.00000000001);
+		assertEquals(4, d.getInputsForRow(2)[1], 0.00000000001);
+		
+		//function should return null if the requested row doesn't exist
+		assertNull(d.getInputsForRow(3));
+		
+		f.delete();
 	}
 	
 	@Test
 	public void testDataSetGetOutputsForRow() {
+		File f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"1,1,0\r\n" + 
+					"2,3,5\r\n" + 
+					"4,4,4\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
+		DataSet d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(1, d.getOutputsForRow(0).length);
+		assertEquals(0, d.getOutputsForRow(0)[0], 0.00000000001);
+		
+		assertEquals(1, d.getOutputsForRow(1).length);
+		assertEquals(5, d.getOutputsForRow(1)[0], 0.00000000001);
+		
+		assertEquals(1, d.getOutputsForRow(2).length);
+		assertEquals(4, d.getOutputsForRow(2)[0], 0.00000000001);
+		
+		//function should return null if the requested row doesn't exist
+		assertNull(d.getInputsForRow(3));
+		
+		f.delete();
 	}
 }

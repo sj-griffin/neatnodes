@@ -493,14 +493,14 @@ public class GlobalFunctions {
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
 		//the fitness comes first in the filename so that files can be sorted by fitness
 		String timestamp = new Timestamp(System.currentTimeMillis()).toString().replace(' ', '.').replace(':', '.').replace('.', '-');
-		File output = new File("C:/genomes/genome-" + globalChampion.getFitness() + "-" + timestamp + ".json");
-		JSONTools.writeGenomeToFile(globalChampion, output, "Champion XOR genome, fitness: " + globalChampion.getFitness() + "/21^2");
+		String outputPath = "C:/genomes/genome-" + globalChampion.getFitness() + "-" + timestamp + ".json";
+		JSONTools.writeGenomeToFile(globalChampion, outputPath, "Champion XOR genome, fitness: " + globalChampion.getFitness() + "/21^2");
 		
 		startRenderer(globalChampion);
 		
 		//verify that the JSON writer and parser are replicating the genome correctly
-		File f = new File("C:/genomes/genome-" + globalChampion.getFitness() + "-" + timestamp + ".json");
-		Genome testGenome = JSONTools.readGenomeFromFile(f);
+		String inputPath = "C:/genomes/genome-" + globalChampion.getFitness() + "-" + timestamp + ".json";
+		Genome testGenome = JSONTools.readGenomeFromFile(inputPath);
 		
 		startRenderer(testGenome);
 	}
