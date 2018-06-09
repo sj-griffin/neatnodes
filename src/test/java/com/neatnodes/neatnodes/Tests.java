@@ -745,16 +745,40 @@ public class Tests {
 	@Test
 	public void testGlobalFunctionsSetupInitialSpecies() {
 		InnovationManager iManager = new InnovationManager();
-		Species s = GlobalFunctions.setupInitialSpecies(5, iManager);
+		Species s = GlobalFunctions.setupInitialSpecies(3, 2, 5, iManager);
 		assertEquals(5, s.getGenomes().size());
 		assertFalse(s.isFinalised());
 		assertEquals(0, s.getGenerationsWithoutImprovement());
 		assertEquals(0.0, s.getMaxFitness());
 		
 		Genome g = s.getGenomes().get(4);
-		assertEquals(2, g.getNumberOfInputs());
-		assertEquals(1, g.getNumberOfOutputs());
-		assertEquals(3, g.getConnectionGenes().size());
+		assertEquals(3, g.getNumberOfInputs());
+		assertEquals(2, g.getNumberOfOutputs());
+		assertEquals(8, g.getConnectionGenes().size());
+		
+		assertEquals(0, g.getConnection(iManager.getInnovationNumber(0, 4)).getInNode().getLabel());
+		assertEquals(4, g.getConnection(iManager.getInnovationNumber(0, 4)).getOutNode().getLabel());
+
+		assertEquals(1, g.getConnection(iManager.getInnovationNumber(1, 4)).getInNode().getLabel());
+		assertEquals(4, g.getConnection(iManager.getInnovationNumber(1, 4)).getOutNode().getLabel());
+		
+		assertEquals(2, g.getConnection(iManager.getInnovationNumber(2, 4)).getInNode().getLabel());
+		assertEquals(4, g.getConnection(iManager.getInnovationNumber(2, 4)).getOutNode().getLabel());
+		
+		assertEquals(3, g.getConnection(iManager.getInnovationNumber(3, 4)).getInNode().getLabel());
+		assertEquals(4, g.getConnection(iManager.getInnovationNumber(3, 4)).getOutNode().getLabel());
+		
+		assertEquals(0, g.getConnection(iManager.getInnovationNumber(0, 5)).getInNode().getLabel());
+		assertEquals(5, g.getConnection(iManager.getInnovationNumber(0, 5)).getOutNode().getLabel());
+		
+		assertEquals(1, g.getConnection(iManager.getInnovationNumber(1, 5)).getInNode().getLabel());
+		assertEquals(5, g.getConnection(iManager.getInnovationNumber(1, 5)).getOutNode().getLabel());
+		
+		assertEquals(2, g.getConnection(iManager.getInnovationNumber(2, 5)).getInNode().getLabel());
+		assertEquals(5, g.getConnection(iManager.getInnovationNumber(2, 5)).getOutNode().getLabel());
+		
+		assertEquals(3, g.getConnection(iManager.getInnovationNumber(3, 5)).getInNode().getLabel());
+		assertEquals(5, g.getConnection(iManager.getInnovationNumber(3, 5)).getOutNode().getLabel());
 	}
 	
 	@Test

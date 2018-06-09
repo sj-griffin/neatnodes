@@ -262,17 +262,27 @@ public class GlobalFunctions {
 		g.addConnection(nodeToAdd1.getLabel(), nodeToAdd2.getLabel(), c.getWeight(), enabled, c.getInnovationNumber());
 	}
 	
-	//set up an initial population of genomes with 2 inputs and 1 output in an initial species
+	//set up an initial population of genomes with the specified number of inputs and outputs in an initial species
 	//we start with a uniform population with no hidden nodes
 	//takes a populationSize which is the number of genomes to create
-	public static Species setupInitialSpecies(int populationSize, InnovationManager iManager) {
+	public static Species setupInitialSpecies(int inputs, int outputs, int populationSize, InnovationManager iManager) {
 		Genome baseGenome = new Genome(iManager);
-		baseGenome.addNode(1, Node.INPUT);
-		baseGenome.addNode(2, Node.INPUT);
-		baseGenome.addNode(3, Node.OUTPUT);
-		baseGenome.addConnection(0, 3, 1.0, true, iManager.getInnovationNumber(0,3));
-		baseGenome.addConnection(1, 3, 1.0, true, iManager.getInnovationNumber(1,3));
-		baseGenome.addConnection(2, 3, 1.0, true, iManager.getInnovationNumber(2,3));
+		//create the input nodes
+		for(int i = 1; i <= inputs; i++) {
+			baseGenome.addNode(i, Node.INPUT);
+		}
+		
+		//create the output nodes
+		for(int i = 1; i <= outputs; i++) {
+			baseGenome.addNode(inputs + i, Node.OUTPUT);
+		}
+		
+		//create a connection from each bias/input to each output
+		for(int i = 0; i <= inputs; i++) { //we start from 0 to include the bias node
+			for(int j = 1; j <= outputs; j++) {
+				baseGenome.addConnection(i, inputs + j, 1.0, true, iManager.getInnovationNumber(i, inputs + j));
+			}
+		}
 		
 		Species result = new Species(baseGenome, 0.0, 0);
 		
@@ -372,7 +382,7 @@ public class GlobalFunctions {
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		
 		//setup an initial uniform population in an initial species
-		allSpecies.add(GlobalFunctions.setupInitialSpecies(GlobalFunctions.initialPopulationSize, iManager));
+		allSpecies.add(GlobalFunctions.setupInitialSpecies(2, 1, GlobalFunctions.initialPopulationSize, iManager));
 		
 		Genome globalChampion = null;
 		
