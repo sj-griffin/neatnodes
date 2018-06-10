@@ -804,7 +804,8 @@ public class Tests {
 	}
 	
 	@Test
-	public void testGlobalFunctionsRunXOR() {
+	public void testGlobalFunctionsRunFunction() {
+		//test with a genome that has been configured to calculate the XOR function
 		InnovationManager iManager = new InnovationManager();
 		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
@@ -822,10 +823,30 @@ public class Tests {
 		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 		
-		assertEquals(0.05248796662764476, GlobalFunctions.runXOR(g, 0, 0), 0.000000000000000001);
-		assertEquals(0.08756708774628402, GlobalFunctions.runXOR(g, 1, 1), 0.000000000000000001);
-		assertEquals(0.9849160396696722, GlobalFunctions.runXOR(g, 0, 1), 0.000000000000000001);
-		assertEquals(0.9837502384439617, GlobalFunctions.runXOR(g, 1, 0), 0.000000000000000001);
+		double[] inputs1 = {0.0, 0.0};
+		double[] expectedOutputs1 = {0.05248796662764476};
+		assertArrayEquals(expectedOutputs1, GlobalFunctions.runFunction(g, inputs1));
+		
+		double[] inputs2 = {1, 1};
+		double[] expectedOutputs2 = {0.08756708774628402};
+		assertArrayEquals(expectedOutputs2, GlobalFunctions.runFunction(g, inputs2));
+		
+		double[] inputs3 = {0, 1};
+		double[] expectedOutputs3 = {0.9849160396696722};
+		assertArrayEquals(expectedOutputs3, GlobalFunctions.runFunction(g, inputs3));
+		
+		double[] inputs4 = {1, 0};
+		double[] expectedOutputs4 = {0.9837502384439617};
+		assertArrayEquals(expectedOutputs4, GlobalFunctions.runFunction(g, inputs4));
+		
+		//should fail if the inputs do not match what is defined in the genome
+		double[] inputs5 = {1, 0, 1};
+		Executable testBlock = () -> { GlobalFunctions.runFunction(g, inputs5); };		
+	    assertThrows(GenomeException.class, testBlock);
+	    
+		double[] inputs6 = {1};
+		testBlock = () -> { GlobalFunctions.runFunction(g, inputs6); };		
+	    assertThrows(GenomeException.class, testBlock);
 	}
 	
 	//Innovation tests

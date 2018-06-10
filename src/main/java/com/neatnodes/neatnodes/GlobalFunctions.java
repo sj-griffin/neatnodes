@@ -299,49 +299,65 @@ public class GlobalFunctions {
 	protected static double testXORFitness(Genome g){
 		//there are 4 possible inputs to XOR. The fitness is a function of the differences between each of the 4 results and the expected output.
 		//outputs will be between 0 and 1
-		double r1 = runXOR(g, 0.0, 0.0); //expected result 0
-		double r2 = runXOR(g, 1.0, 1.0); //expected result 0
-		double r3 = runXOR(g, 0.0, 1.0); //expected result 1
-		double r4 = runXOR(g, 1.0, 0.0); //expected result 1
+		double[] i1 = {0.0, 0.0};
+		double[] r1 = runFunction(g, i1); //expected result 0
+		double[] i2 = {1.0, 1.0};
+		double[] r2 = runFunction(g, i2); //expected result 0
+		double[] i3 = {0.0, 1.0};
+		double[] r3 = runFunction(g, i3); //expected result 1
+		double[] i4 = {1.0, 0.0};
+		double[] r4 = runFunction(g, i4); //expected result 1
 		
 		//adding additional inputs to try and smooth the function and make it easier for it to get past the limits it can't get over
-		double r5 = runXOR(g, 0.5, 0.5); //expected result 0.5
-		double r6 = runXOR(g, 0.25, 0.75); //expected result 0.75
-		double r7 = runXOR(g, 0.25, 0.25); //expected result 0.25
-		double r8 = runXOR(g, 0.75, 0.25); //expected result 0.75
-		double r9 = runXOR(g, 0.75, 0.75); //expected result 0.25
+		double[] i5 = {0.5, 0.5};
+		double[] r5 = runFunction(g, i5); //expected result 0.5
+		double[] i6 = {0.25, 0.75};
+		double[] r6 = runFunction(g, i6); //expected result 0.75
+		double[] i7 = {0.25, 0.25};
+		double[] r7 = runFunction(g, i7); //expected result 0.25
+		double[] i8 = {0.75, 0.25};
+		double[] r8 = runFunction(g, i8); //expected result 0.75
+		double[] i9 = {0.75, 0.75};
+		double[] r9 = runFunction(g, i9); //expected result 0.25
 		
-		double r10 = runXOR(g, 0.125, 0.125); //expected result 0.125
-		double r11 = runXOR(g, 0.375, 0.375); //expected result 0.375
-		double r12 = runXOR(g, 0.625, 0.375); //expected result 0.625
-		double r13 = runXOR(g, 0.875, 0.125); //expected result 0.875
-		double r14 = runXOR(g, 0.125, 0.875); //expected result 0.875
-		double r15 = runXOR(g, 0.375, 0.625); //expected result 0.625
-		double r16 = runXOR(g, 0.625, 0.625); //expected result 0.375
-		double r17 = runXOR(g, 0.875, 0.875); //expected result 0.125
-
+		double[] i10 = {0.125, 0.125};
+		double[] r10 = runFunction(g, i10); //expected result 0.125
+		double[] i11 = {0.375, 0.375};
+		double[] r11 = runFunction(g, i11); //expected result 0.375
+		double[] i12 = {0.625, 0.375};
+		double[] r12 = runFunction(g, i12); //expected result 0.625
+		double[] i13 = {0.875, 0.125};
+		double[] r13 = runFunction(g, i13); //expected result 0.875
+		double[] i14 = {0.125, 0.875};
+		double[] r14 = runFunction(g, i14); //expected result 0.875
+		double[] i15 = {0.375, 0.625};
+		double[] r15 = runFunction(g, i15); //expected result 0.625
+		double[] i16 = {0.625, 0.625};
+		double[] r16 = runFunction(g, i16); //expected result 0.375
+		double[] i17 = {0.875, 0.875};
+		double[] r17 = runFunction(g, i17); //expected result 0.125
 		
 		//the differences between each result and the expected result
 		
-		double d1 = Math.abs(r1 - 0.0);
-		double d2 = Math.abs(r2 - 0.0);
-		double d3 = Math.abs(r3 - 1.0);
-		double d4 = Math.abs(r4 - 1.0);
+		double d1 = Math.abs(r1[0] - 0.0);
+		double d2 = Math.abs(r2[0] - 0.0);
+		double d3 = Math.abs(r3[0] - 1.0);
+		double d4 = Math.abs(r4[0] - 1.0);
 		
-		double d5 = Math.abs(r5 - 0.5);
-		double d6 = Math.abs(r6 - 0.75);
-		double d7 = Math.abs(r7 - 0.25);
-		double d8 = Math.abs(r8 - 0.75);
-		double d9 = Math.abs(r9 - 0.25);
+		double d5 = Math.abs(r5[0] - 0.5);
+		double d6 = Math.abs(r6[0] - 0.75);
+		double d7 = Math.abs(r7[0] - 0.25);
+		double d8 = Math.abs(r8[0] - 0.75);
+		double d9 = Math.abs(r9[0] - 0.25);
 		
-		double d10 = Math.abs(r10 - 0.125);
-		double d11 = Math.abs(r11 - 0.375);
-		double d12 = Math.abs(r12 - 0.625);
-		double d13 = Math.abs(r13 - 0.875);
-		double d14 = Math.abs(r14 - 0.875);
-		double d15 = Math.abs(r15 - 0.625);
-		double d16 = Math.abs(r16 - 0.375);
-		double d17 = Math.abs(r17 - 0.125);
+		double d10 = Math.abs(r10[0] - 0.125);
+		double d11 = Math.abs(r11[0] - 0.375);
+		double d12 = Math.abs(r12[0] - 0.625);
+		double d13 = Math.abs(r13[0] - 0.875);
+		double d14 = Math.abs(r14[0] - 0.875);
+		double d15 = Math.abs(r15[0] - 0.625);
+		double d16 = Math.abs(r16[0] - 0.375);
+		double d17 = Math.abs(r17[0] - 0.125);
 		
 		//the total difference. The maximum is 21.0, for when all answers are completely wrong.
 		//experimenting with doubling the weight of the 4 key input sets as they are the ones which count
@@ -353,28 +369,37 @@ public class GlobalFunctions {
 		return Math.pow(21.0 - sum, 2);
 	}
 	
-	//makes a genome run the XOR function with the specified inputs and returns the output
-	protected static double runXOR(Genome g, double input1, double input2){
-		g.reset(); //reset the genome before giving it new inputs
-		
-		HashMap<Integer, Double> inputs;
-		HashMap<Integer, Double> results;
+	//runs the function implemented by the supplied genome with the specified inputs and returns the outputs
+	//the number of inputs must match what is expected by the genome or this method will throw an exception
+	//this function assumes that the genome has all its inputs in consecutive node positions starting from 1
+	protected static double[] runFunction(Genome g, double[] inputs) {
+		if(inputs.length != g.getNumberOfInputs()) {
+			throw new GenomeException();
+		}
 		
 		//set the inputs
-		inputs = new HashMap<Integer, Double>();
-		inputs.put(1, input1);
-		inputs.put(2, input2);
-		g.writeInputs(inputs);
+		HashMap<Integer, Double> inputMap = new HashMap<Integer, Double>();
+		for(int i = 0; i < inputs.length; i++) {
+			inputMap.put(i + 1, inputs[i]);
+		}
+		g.writeInputs(inputMap);
 		
 		//run the genome for a preset number of cycles
 		for(int i = 0; i < GlobalFunctions.depth; i++){
 			g.run();
 		}
 		
-		//read the output
-		results = g.readOutputs();
+		//read the outputs
+		HashMap<Integer, Double> outputMap = g.readOutputs();
 		g.reset();
-		return results.get(3);
+		
+		double[] outputs = new double[outputMap.size()];
+		int index = 0;
+		for(Integer key : outputMap.keySet()) {
+			outputs[index] = outputMap.get(key);
+			index ++;
+		}
+		return outputs;
 	}
 	
 	public static void runSimulation() {
@@ -493,10 +518,14 @@ public class GlobalFunctions {
 		
 		//print the results produced by the best genome
 		System.out.println("Simulation complete. The global champion produces the following results:");
-		System.out.println("0,0: "+ runXOR(globalChampion, 0, 0));
-		System.out.println("1,1: "+ runXOR(globalChampion, 1, 1));
-		System.out.println("0,1: "+ runXOR(globalChampion, 0, 1));
-		System.out.println("1,0: "+ runXOR(globalChampion, 1, 0));
+		double[] inputs1 = {0, 0};
+		System.out.println("0,0: "+ runFunction(globalChampion, inputs1)[0]);
+		double[] inputs2 = {1, 1};
+		System.out.println("1,1: "+ runFunction(globalChampion, inputs2)[0]);
+		double[] inputs3 = {0, 1};
+		System.out.println("0,1: "+ runFunction(globalChampion, inputs3)[0]);
+		double[] inputs4 = {1, 0};
+		System.out.println("1,0: "+ runFunction(globalChampion, inputs4)[0]);
 		System.out.println("Fitness: " + globalChampion.getFitness());
 		
 		//write the global champion to a file so it can be retrieved later
