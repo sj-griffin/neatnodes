@@ -10,11 +10,11 @@ import java.util.Map;
 import org.json.*;
 
 
-public class JSONTools {
+class JSONTools {
 	
 	//take a genome and write json to a file representing it. The specified comment will be written as an attribute at the top of the file and can be used to provide information about where the genome came from
 	//takes the path to a JSON file that will be created
-	public static void writeGenomeToFile(Genome g, String filePath, String comment){	
+	protected static void writeGenomeToFile(Genome g, String filePath, String comment){	
 		File f = new File(filePath);
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -97,7 +97,7 @@ public class JSONTools {
 	}
 	
 	//take a path to a JSON file and produce a new genome from the information in it
-	public static Genome readGenomeFromFile(String filePath){
+	protected static Genome readGenomeFromFile(String filePath){
 		File f = new File(filePath);
 		InnovationManager iManager = new InnovationManager();
 		Genome output = new Genome(iManager);

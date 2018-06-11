@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class Genome {
+class Genome {
 	private HashMap<Integer, Node> nodeGenes; //nodeGenes keys correspond to labels, which should be numbered 0-n. they are stored in a hashmap to ensure that they can always be accessed by the same key
 	private HashMap<Integer, Connection> connectionGenes; //connectionGenes keys correspond to innovation numbers, which will be unique
 	
@@ -18,7 +18,7 @@ public class Genome {
 	private InnovationManager iManager; //the InnovationManager to retrieve innovation numbers from
 	
 	//when creating a genome, only input, hidden and output nodes need to be added manually. The bias node will be created automatically. However, the bias node must be manually connected to other nodes.
-	public Genome(InnovationManager iManager){
+	protected Genome(InnovationManager iManager){
 		this.iManager = iManager;
 		nodeGenes = new HashMap<Integer, Node>();
 		connectionGenes = new HashMap<Integer, Connection>();
@@ -33,32 +33,32 @@ public class Genome {
 		nodeGenes.get(0).setValue(1.0);
 	}
 	
-	public int getNumberOfInputs() {
+	protected int getNumberOfInputs() {
 		return numberOfInputs;
 	}
 
-	public int getNumberOfOutputs() {
+	protected int getNumberOfOutputs() {
 		return numberOfOutputs;
 	}
 
-	public Node getNode(int n){
+	protected Node getNode(int n){
 		return nodeGenes.get(n);
 	}
 	
-	public Connection getConnection(int n){
+	protected Connection getConnection(int n){
 		return connectionGenes.get(n);
 	}
 	
-	public HashMap<Integer, Node> getNodeGenes() {
+	protected HashMap<Integer, Node> getNodeGenes() {
 		return nodeGenes;
 	}
 
-	public HashMap<Integer, Connection> getConnectionGenes() {
+	protected HashMap<Integer, Connection> getConnectionGenes() {
 		return connectionGenes;
 	}
 
 	//adds a new node defined by the arguments and returns true if successful
-	public void addNode(int label, int type){
+	protected void addNode(int label, int type){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
 			throw new GenomeException();
@@ -90,7 +90,7 @@ public class Genome {
 	//adds a new connection defined by the arguments and returns true if successful
 	//in and out nodes are defined by their number in the genome to ensure that the nodes exist in the genome
 	//we take an innovation number as an argument rather than generating it because we need to be able to pass in specific innovation numbers from previous generations after the innovations from the previous generation have already been reset
-	public void addConnection(int inNodeNumber, int outNodeNumber, double weight, boolean enabled, int innovationNumber){
+	protected void addConnection(int inNodeNumber, int outNodeNumber, double weight, boolean enabled, int innovationNumber){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
 			throw new GenomeException();
@@ -115,7 +115,7 @@ public class Genome {
 	}
 	
 	//applies a set of mutations to the genome. Should be called after a new genome is bred.
-	public void mutate(){
+	protected void mutate(){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
 			throw new GenomeException();
@@ -127,13 +127,13 @@ public class Genome {
 		}
 		
 		//the chance of each type of mutation occurring are set by global variables
-		if(Math.random() < GlobalFunctions.weightMutationChance){
+		if(Math.random() < StaticFunctions.weightMutationChance){
 			mutateWeights();
 		}
-		if(Math.random() < GlobalFunctions.nodeMutationChance){
+		if(Math.random() < StaticFunctions.nodeMutationChance){
 			nodeMutation();
 		}
-		if(Math.random() < GlobalFunctions.linkMutationChance){
+		if(Math.random() < StaticFunctions.linkMutationChance){
 			linkMutation();
 		}
 	}
@@ -231,7 +231,7 @@ public class Genome {
 	}
 	
 	//returns a clone of this genome with all the same nodes and connections represented by new objects. The new genome will have no fitness and be open for editing even if this one has already been locked.
-	public Genome cloneGenome(){
+	protected Genome cloneGenome(){
 		Genome newGenome = new Genome(iManager);
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
 
@@ -254,7 +254,7 @@ public class Genome {
 	//the bias node is not an input node, so this method will fail if you try to set it
 	//fails if any labels don't map to input nodes
 	//this works because node labels remain consistent across generations
-	public void writeInputs(HashMap<Integer, Double> inputs){
+	protected void writeInputs(HashMap<Integer, Double> inputs){
 		if (inputs.size() != numberOfInputs){
 			//fail if the number of inputs is incorrect
 			throw new GenomeException();
@@ -273,7 +273,7 @@ public class Genome {
 	
 	//returns a hashmap mapping node labels to values representing the current outputs of the genome
 	//this works because node labels remain consistent across generations
-	public HashMap<Integer, Double> readOutputs(){
+	protected HashMap<Integer, Double> readOutputs(){
 		HashMap<Integer, Double> outputs = new HashMap<Integer, Double>();
 		
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
@@ -292,7 +292,7 @@ public class Genome {
 	}
 	
 	//run the whole network for one step
-	public void run(){
+	protected void run(){
 		//ensure that the bias node has a value of 1
 		nodeGenes.get(0).setValue(1.0);
 		
@@ -307,23 +307,23 @@ public class Genome {
 	}
 	
 	//sets all values except the bias node back to 0. The bias node is set to 1.
-	public void reset(){
+	protected void reset(){
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
 			node.getValue().reset();
 		}
 		nodeGenes.get(0).setValue(1.0);
 	}
 	
-	public boolean isFitnessMeasured(){
+	protected boolean isFitnessMeasured(){
 		return fitnessMeasured;
 	}
 	
-	public void setFitness(double fitness){
+	protected void setFitness(double fitness){
 		this.fitness = fitness;
 		fitnessMeasured = true;
 	}
 	
-	public double getFitness(){
+	protected double getFitness(){
 		//if the fitness has not been set, fail
 		if(!fitnessMeasured){
 			throw new GenomeException();

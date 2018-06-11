@@ -648,8 +648,9 @@ public class Tests {
 		}
 	}
 	
+	//StaticFunctions tests
 	@Test
-	public void testGlobalFunctionsCalculateCompatabilityDistance() {
+	public void testStaticFunctionsCalculateCompatabilityDistance() {
 		InnovationManager iManager = new InnovationManager();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
@@ -665,7 +666,7 @@ public class Tests {
 		g2.addConnection(0, 2, 4.5, true, iManager.getInnovationNumber(0, 2));
 		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		
-		double result = GlobalFunctions.calculateCompatabilityDistance(g1, g2);
+		double result = StaticFunctions.calculateCompatabilityDistance(g1, g2);
 		
 		assertEquals(2.4, result, 0.000000001);
 		
@@ -673,12 +674,12 @@ public class Tests {
 		Genome g4 = new Genome(iManager);
 		
 		//the calculation should throw an exception if either genome is empty
-		Executable testBlock = () -> { GlobalFunctions.calculateCompatabilityDistance(g3, g4); };		
+		Executable testBlock = () -> { StaticFunctions.calculateCompatabilityDistance(g3, g4); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	
 	@Test
-	public void testGlobalFunctionsBreed() {
+	public void testStaticFunctionsBreed() {
 		InnovationManager iManager = new InnovationManager();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
@@ -696,7 +697,7 @@ public class Tests {
 		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		g2.setFitness(20);
 		
-		Genome offspring = GlobalFunctions.breed(g1, g2, iManager);
+		Genome offspring = StaticFunctions.breed(g1, g2, iManager);
 		
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
@@ -721,7 +722,7 @@ public class Tests {
 		assertNull(c);
 		
 		//verify that we get the same results when g2 is the father instead of g1
-		offspring = GlobalFunctions.breed(g2, g1, iManager);
+		offspring = StaticFunctions.breed(g2, g1, iManager);
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
@@ -743,9 +744,9 @@ public class Tests {
 	}
 	
 	@Test
-	public void testGlobalFunctionsSetupInitialSpecies() {
+	public void testStaticFunctionsSetupInitialSpecies() {
 		InnovationManager iManager = new InnovationManager();
-		Species s = GlobalFunctions.setupInitialSpecies(3, 2, 5, iManager);
+		Species s = StaticFunctions.setupInitialSpecies(3, 2, 5, iManager);
 		assertEquals(5, s.getGenomes().size());
 		assertFalse(s.isFinalised());
 		assertEquals(0, s.getGenerationsWithoutImprovement());
@@ -781,8 +782,9 @@ public class Tests {
 		assertEquals(5, g.getConnection(iManager.getInnovationNumber(3, 5)).getOutNode().getLabel());
 	}
 	
+	//API tests
 	@Test
-	public void testGlobalFunctionsTestFitness() {
+	public void testAPITestFitness() {
 		DataSet d = null;
 		try {
 			d = new DataSet("./XOR.csv");
@@ -807,11 +809,11 @@ public class Tests {
 		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 
-		assertEquals(92.82474446330792, GlobalFunctions.testFitness(g, d), 0.00000000000001);
+		assertEquals(92.82474446330792, API.testFitness(g, d), 0.00000000000001);
 	}
 	
 	@Test
-	public void testGlobalFunctionsRunFunction() {
+	public void testAPIRunFunction() {
 		//test with a genome that has been configured to calculate the XOR function
 		InnovationManager iManager = new InnovationManager();
 		Genome g = new Genome(iManager);
@@ -832,27 +834,27 @@ public class Tests {
 		
 		Double[] inputs1 = {0.0, 0.0};
 		Double[] expectedOutputs1 = {0.05248796662764476};
-		assertArrayEquals(expectedOutputs1, GlobalFunctions.runFunction(g, inputs1));
+		assertArrayEquals(expectedOutputs1, API.runFunction(g, inputs1));
 		
 		Double[] inputs2 = {1.0, 1.0};
 		Double[] expectedOutputs2 = {0.08756708774628402};
-		assertArrayEquals(expectedOutputs2, GlobalFunctions.runFunction(g, inputs2));
+		assertArrayEquals(expectedOutputs2, API.runFunction(g, inputs2));
 		
 		Double[] inputs3 = {0.0, 1.0};
 		Double[] expectedOutputs3 = {0.9849160396696722};
-		assertArrayEquals(expectedOutputs3, GlobalFunctions.runFunction(g, inputs3));
+		assertArrayEquals(expectedOutputs3, API.runFunction(g, inputs3));
 		
 		Double[] inputs4 = {1.0, 0.0};
 		Double[] expectedOutputs4 = {0.9837502384439617};
-		assertArrayEquals(expectedOutputs4, GlobalFunctions.runFunction(g, inputs4));
+		assertArrayEquals(expectedOutputs4, API.runFunction(g, inputs4));
 		
 		//should fail if the inputs do not match what is defined in the genome
 		Double[] inputs5 = {1.0, 0.0, 1.0};
-		Executable testBlock = () -> { GlobalFunctions.runFunction(g, inputs5); };		
+		Executable testBlock = () -> { API.runFunction(g, inputs5); };		
 	    assertThrows(GenomeException.class, testBlock);
 	    
 		Double[] inputs6 = {1.0};
-		testBlock = () -> { GlobalFunctions.runFunction(g, inputs6); };		
+		testBlock = () -> { API.runFunction(g, inputs6); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	

@@ -12,7 +12,7 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
-public class DataSet {
+class DataSet {
 	private final int inputs; //the number of inputs for the function represented by this dataset
 	private final int outputs; //the number of outputs for the function represented by this dataset
 	private List<Double[]> entries = new ArrayList<Double[]>(); //stores the dataset itself
@@ -25,7 +25,7 @@ public class DataSet {
 	//you can add an optional weight column as the last column
 	//all rows must have numeric values for each header
 	//all rows must align with the header row
-	public DataSet(String pathToCSV) throws DataFormatException{
+	protected DataSet(String pathToCSV) throws DataFormatException{
 	    int inputNumber = 0;
 	    int outputNumber = 0;
 	    boolean weightsFound = false;
@@ -108,26 +108,26 @@ public class DataSet {
 		}
 	}
 	
-	public int getInputNumber() {
+	protected int getInputNumber() {
 		return this.inputs;
 	}
 
-	public int getOutputNumber() {
+	protected int getOutputNumber() {
 		return this.outputs;
 	}
 	
-	public int getNumberOfEntries() {
+	protected int getNumberOfEntries() {
 		return this.entries.size();
 	}
 	
-	public boolean isWeighted() {
+	protected boolean isWeighted() {
 		return this.hasWeights;
 	}
 
 	//return an array of doubles representing the inputs in a given row
 	//row numbers start from 0
 	//returns null if the supplied row number is invalid
-	public Double[] getInputsForRow(int rowNumber) {
+	protected Double[] getInputsForRow(int rowNumber) {
 		Double[] row = null;
 		try {
 			row = this.entries.get(rowNumber);
@@ -145,7 +145,7 @@ public class DataSet {
 	//return an array of doubles representing the outputs in a given row
 	//row numbers start from 0
 	//returns null if the supplied row number is invalid
-	public Double[] getOutputsForRow(int rowNumber) {
+	protected Double[] getOutputsForRow(int rowNumber) {
 		Double[] row = null;
 		try {
 			row = this.entries.get(rowNumber);
@@ -164,7 +164,7 @@ public class DataSet {
 	//row numbers start from 0
 	//returns null if the supplied row number is invalid
 	//returns null if the DataSet does not have weights
-	public Double getWeightForRow(int rowNumber) {
+	protected Double getWeightForRow(int rowNumber) {
 		if(!this.hasWeights) {
 			return null;
 		}

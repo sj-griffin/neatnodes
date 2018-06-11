@@ -1,5 +1,5 @@
 package com.neatnodes.neatnodes;
 
-public class GenomeException extends RuntimeException {
+class GenomeException extends RuntimeException {
 	
 }

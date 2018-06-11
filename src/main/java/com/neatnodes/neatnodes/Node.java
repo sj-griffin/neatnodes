@@ -2,11 +2,11 @@ package com.neatnodes.neatnodes;
 
 import java.util.ArrayList;
 
-public class Node {
-	public static final int INPUT = 1;
-	public static final int OUTPUT = 2;
-	public static final int HIDDEN = 3;
-	public static final int BIAS = 4;
+class Node {
+	protected static final int INPUT = 1;
+	protected static final int OUTPUT = 2;
+	protected static final int HIDDEN = 3;
+	protected static final int BIAS = 4;
 	
 	private int type;
 	private int label; //a label used to identify the node. Unique within a genome.
@@ -14,7 +14,7 @@ public class Node {
 	private ArrayList<Double> inputs;
 	private double value; //the value currently being output by the node
 	
-	public Node (int type, int label){
+	protected Node (int type, int label){
 		this.type = type;
 		this.label = label;
 		
@@ -22,16 +22,16 @@ public class Node {
 		this.value = 0.0;
 	}
 
-	public int getType() {
+	protected int getType() {
 		return type;
 	}
 	
-	public int getLabel() {
+	protected int getLabel() {
 		return label;
 	}
 	
 	//add a value to the inputs currently being received by the node
-	public void addInput(double input){
+	protected void addInput(double input){
 		inputs.add(input);
 	}
 	
@@ -41,12 +41,12 @@ public class Node {
 	}
 	
 	//return the value being output by the node
-	public double getValue(){
+	protected double getValue(){
 		return value;
 	}
 	
 	//take all the current inputs and use the sigmoid function to set the output. Inputs are cleared once they are used.
-	public void fire(){
+	protected void fire(){
 		//do nothing if the node is an input or bias node or there are no inputs
 		if(type == INPUT || type == BIAS || inputs.isEmpty()){
 			return;
@@ -69,7 +69,7 @@ public class Node {
 	}
 	
 	
-	public void setValue(double value){
+	protected void setValue(double value){
 		if(type != INPUT && type != BIAS){
 			//fail if something is trying to set a non-input/bias value
 			throw new GenomeException();
@@ -78,7 +78,7 @@ public class Node {
 	}
 	
 	//return the value to 0.0
-	public void reset(){
+	protected void reset(){
 		this.value = 0.0;
 	}
 	

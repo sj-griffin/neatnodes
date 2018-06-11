@@ -2,17 +2,17 @@ package com.neatnodes.neatnodes;
 
 import java.util.ArrayList;
 
-public class InnovationManager {
+class InnovationManager {
 	private int currentInnovationNumber; //used to track gene history
 	private ArrayList<Innovation> currentInnovations; //stores the innovations created during the current generation so that the same innovation number can be applied to equivalent mutations
 	
-	public InnovationManager() {
+	protected InnovationManager() {
 		this.currentInnovationNumber = 0;
 		this.currentInnovations = new ArrayList<Innovation>();
 	}
 	
 	//reset the list of innovations for a new generation
-	public void newGeneration(){
+	protected void newGeneration(){
 		this.currentInnovations = new ArrayList<Innovation>();
 	}
 	
@@ -23,7 +23,7 @@ public class InnovationManager {
 	*
 	*WARNING: be careful using this method when setting up the initial genomes. Make sure equivalent nodes are actually numbered the same or it will stuff up the whole run.
 	**/
-	public int getInnovationNumber(int inNodeLabel, int outNodeLabel){
+	protected int getInnovationNumber(int inNodeLabel, int outNodeLabel){
 		for(int i = 0; i < this.currentInnovations.size(); i++){
 			if(this.currentInnovations.get(i).isEquivalent(inNodeLabel, outNodeLabel)){
 				return this.currentInnovations.get(i).getInnovationNumber();

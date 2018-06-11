@@ -2,7 +2,7 @@ package com.neatnodes.neatnodes;
 
 import java.util.ArrayList;
 
-public class Species {
+class Species {
 	
 	private Genome representativeGenome; //a genome from the previous generation used to measure compatability against
 	
@@ -16,7 +16,7 @@ public class Species {
 	
 	private int generationsWithoutImprovement; //the number of generations since the maxFitness was last increased
 	
-	public Species(Genome representativeGenome, double maxFitness, int generationsWithoutImprovement){
+	protected Species(Genome representativeGenome, double maxFitness, int generationsWithoutImprovement){
 		this.representativeGenome = representativeGenome;
 		this.genomes = new ArrayList<Genome>();
 		this.averageFitness = 0.0;
@@ -27,14 +27,14 @@ public class Species {
 	
 	//attempts to add a genome to the species. The genome will only be added if it falls within the compatability threshold for the species.
 	//returns true only if successful
-	public boolean addGenome(Genome g){
+	protected boolean addGenome(Genome g){
 		//fail if the species is already finalised
 		if(finalised){
 			throw new GenomeException();
 		}
 		
-		double compatabilityDistance = GlobalFunctions.calculateCompatabilityDistance(g, representativeGenome);
-		if(compatabilityDistance <= GlobalFunctions.compatabilityThreshold){
+		double compatabilityDistance = StaticFunctions.calculateCompatabilityDistance(g, representativeGenome);
+		if(compatabilityDistance <= StaticFunctions.compatabilityThreshold){
 			genomes.add(g);
 			return true;
 		}
@@ -42,7 +42,7 @@ public class Species {
 	}
 	
 
-	public ArrayList<Genome> getGenomes() {
+	protected ArrayList<Genome> getGenomes() {
 		return genomes;
 	}
 	
@@ -50,7 +50,7 @@ public class Species {
 	//calculates the adjusted fitnesses for all genomes in the species and sums them together
 	//the adjusted fitness sum mentioned in the paper is the equivalent of the average fitness of the species
 	//this value is used to determine how many offspring the species will produce
-	public void calculateAverageFitness(){
+	protected void calculateAverageFitness(){
 		int numberOfGenomes = genomes.size();
 		
 		double sum = 0.0;
@@ -62,7 +62,7 @@ public class Species {
 		finalised = true;
 	}
 	
-	public double getAverageFitness() {
+	protected double getAverageFitness() {
 		//fail if the average fitness hasn't been calculated yet
 		if(!finalised){
 			throw new GenomeException();
@@ -70,20 +70,20 @@ public class Species {
 		return averageFitness;
 	}
 	
-	public double getMaxFitness(){
+	protected double getMaxFitness(){
 		return maxFitness;
 	}
 	
-	public int getGenerationsWithoutImprovement(){
+	protected int getGenerationsWithoutImprovement(){
 		return generationsWithoutImprovement;
 	}
 
-	public boolean isFinalised() {
+	protected boolean isFinalised() {
 		return finalised;
 	}
 	
 	//returns an offspring bred and mutated from the species. If crossover is true, two random members will be bred , if not a single member will be bred with itself
-	public Genome produceOffspring(boolean crossover, InnovationManager iManager){
+	protected Genome produceOffspring(boolean crossover, InnovationManager iManager){
 		//fail if the species has not been finalised yet
 		if(!finalised){
 			throw new GenomeException();
@@ -100,7 +100,7 @@ public class Species {
 		}
 		
 		//breed them and apply a mutation to the offspring
-		Genome offspring = GlobalFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex), iManager);
+		Genome offspring = StaticFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex), iManager);
 		offspring.mutate();
 		
 		return offspring;
@@ -108,7 +108,7 @@ public class Species {
 	
 	//remove the weakest 50% of genomes and return the best performing genome
 	//if the fitness of that genome exceeds the maxFitness, that becomes the new maxFitness
-	public Genome cull(){
+	protected Genome cull(){
 		//sort the genomes by fitness
 		Genome[] asArray = new Genome[this.genomes.size()];
 		this.genomes.toArray(asArray);
