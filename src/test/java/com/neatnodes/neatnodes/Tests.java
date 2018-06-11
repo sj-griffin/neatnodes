@@ -782,7 +782,14 @@ public class Tests {
 	}
 	
 	@Test
-	public void testGlobalFunctionsTestXORFitness() {
+	public void testGlobalFunctionsTestFitness() {
+		DataSet d = null;
+		try {
+			d = new DataSet("./XOR.csv");
+		} catch (DataFormatException e) {
+			e.printStackTrace();
+			fail();
+		}
 		InnovationManager iManager = new InnovationManager();
 		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
@@ -800,7 +807,7 @@ public class Tests {
 		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 
-		assertEquals(409.3571230831879, GlobalFunctions.testXORFitness(g), 0.00000000000001);
+		assertEquals(92.82474446330792, GlobalFunctions.testFitness(g, d), 0.00000000000001);
 	}
 	
 	@Test
@@ -823,28 +830,28 @@ public class Tests {
 		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 		
-		double[] inputs1 = {0.0, 0.0};
-		double[] expectedOutputs1 = {0.05248796662764476};
+		Double[] inputs1 = {0.0, 0.0};
+		Double[] expectedOutputs1 = {0.05248796662764476};
 		assertArrayEquals(expectedOutputs1, GlobalFunctions.runFunction(g, inputs1));
 		
-		double[] inputs2 = {1, 1};
-		double[] expectedOutputs2 = {0.08756708774628402};
+		Double[] inputs2 = {1.0, 1.0};
+		Double[] expectedOutputs2 = {0.08756708774628402};
 		assertArrayEquals(expectedOutputs2, GlobalFunctions.runFunction(g, inputs2));
 		
-		double[] inputs3 = {0, 1};
-		double[] expectedOutputs3 = {0.9849160396696722};
+		Double[] inputs3 = {0.0, 1.0};
+		Double[] expectedOutputs3 = {0.9849160396696722};
 		assertArrayEquals(expectedOutputs3, GlobalFunctions.runFunction(g, inputs3));
 		
-		double[] inputs4 = {1, 0};
-		double[] expectedOutputs4 = {0.9837502384439617};
+		Double[] inputs4 = {1.0, 0.0};
+		Double[] expectedOutputs4 = {0.9837502384439617};
 		assertArrayEquals(expectedOutputs4, GlobalFunctions.runFunction(g, inputs4));
 		
 		//should fail if the inputs do not match what is defined in the genome
-		double[] inputs5 = {1, 0, 1};
+		Double[] inputs5 = {1.0, 0.0, 1.0};
 		Executable testBlock = () -> { GlobalFunctions.runFunction(g, inputs5); };		
 	    assertThrows(GenomeException.class, testBlock);
 	    
-		double[] inputs6 = {1};
+		Double[] inputs6 = {1.0};
 		testBlock = () -> { GlobalFunctions.runFunction(g, inputs6); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
@@ -937,7 +944,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		assertEquals("{\r\n" + 
@@ -1110,7 +1117,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		Genome g = JSONTools.readGenomeFromFile("./testGenomeRead.json");
@@ -1171,6 +1178,7 @@ public class Tests {
 	//DataSet tests
 	@Test
 	public void testDataSetCreate() {
+		//test creating a standard unweighted DataSet
 		File f = new File("./testDataset.csv");
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -1187,7 +1195,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		DataSet d = null;
@@ -1201,6 +1209,40 @@ public class Tests {
 		assertEquals(6, d.getNumberOfEntries());
 		assertEquals(2, d.getInputNumber());
 		assertEquals(1, d.getOutputNumber());
+		assertFalse(d.isWeighted());
+		
+		//test creating a weighted DataSet
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output,weight\r\n" + 
+					"0,0,0,2\r\n" + 
+					"1,1,0,2\r\n" + 
+					"0,1,1,2\r\n" + 
+					"1,0,1,0.5\r\n" + 
+					"2,3,5,1\r\n" + 
+					"4,4,4,3\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(6, d.getNumberOfEntries());
+		assertEquals(2, d.getInputNumber());
+		assertEquals(1, d.getOutputNumber());
+		assertTrue(d.isWeighted());
 		
 		//create should fail if the csv file is empty
 		f = new File("./testDataset.csv");
@@ -1212,7 +1254,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		Executable testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1230,7 +1272,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1248,7 +1290,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1266,7 +1308,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1283,7 +1325,25 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
+		}
+		
+		testBlock = () -> { new DataSet("./testDataset.csv"); };		
+	    assertThrows(DataFormatException.class, testBlock);
+	    
+	    //create should fail if a weight column occurs before the last column
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,output,weight,output\r\n" + 
+					"0,0,1,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1301,7 +1361,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1318,7 +1378,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1336,7 +1396,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		testBlock = () -> { new DataSet("./testDataset.csv"); };		
@@ -1347,6 +1407,7 @@ public class Tests {
 	
 	@Test
 	public void testDataSetGetInputsForRow() {
+		//test with an unweighted DataSet
 		File f = new File("./testDataset.csv");
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -1360,10 +1421,50 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		DataSet d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(2, d.getInputsForRow(0).length);
+		assertEquals(1, d.getInputsForRow(0)[0], 0.00000000001);
+		assertEquals(1, d.getInputsForRow(0)[1], 0.00000000001);
+		
+		assertEquals(2, d.getInputsForRow(1).length);
+		assertEquals(2, d.getInputsForRow(1)[0], 0.00000000001);
+		assertEquals(3, d.getInputsForRow(1)[1], 0.00000000001);
+		
+		assertEquals(2, d.getInputsForRow(2).length);
+		assertEquals(4, d.getInputsForRow(2)[0], 0.00000000001);
+		assertEquals(4, d.getInputsForRow(2)[1], 0.00000000001);
+		
+		//function should return null if the requested row doesn't exist
+		assertNull(d.getInputsForRow(3));
+		
+		//test with a weighted DataSet
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output,weight\r\n" + 
+					"1,1,0,2\r\n" + 
+					"2,3,5,2\r\n" + 
+					"4,4,4,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		d = null;
 		try {
 			d = new DataSet("./testDataset.csv");
 		}
@@ -1391,6 +1492,7 @@ public class Tests {
 	
 	@Test
 	public void testDataSetGetOutputsForRow() {
+		//test with an unweighted DataSet
 		File f = new File("./testDataset.csv");
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -1404,7 +1506,7 @@ public class Tests {
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		
 		DataSet d = null;
@@ -1426,6 +1528,108 @@ public class Tests {
 		
 		//function should return null if the requested row doesn't exist
 		assertNull(d.getInputsForRow(3));
+		
+		//test with a weighted DataSet
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output,weight\r\n" + 
+					"1,1,0,2\r\n" + 
+					"2,3,5,2\r\n" + 
+					"4,4,4,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(1, d.getOutputsForRow(0).length);
+		assertEquals(0, d.getOutputsForRow(0)[0], 0.00000000001);
+		
+		assertEquals(1, d.getOutputsForRow(1).length);
+		assertEquals(5, d.getOutputsForRow(1)[0], 0.00000000001);
+		
+		assertEquals(1, d.getOutputsForRow(2).length);
+		assertEquals(4, d.getOutputsForRow(2)[0], 0.00000000001);
+		
+		//function should return null if the requested row doesn't exist
+		assertNull(d.getInputsForRow(3));
+		
+		f.delete();
+	}
+	
+	@Test
+	public void testDataSetGetWeightForRow() {
+		File f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output,weight\r\n" + 
+					"1,1,0,2\r\n" + 
+					"2,3,5,2\r\n" + 
+					"4,4,4,1\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		DataSet d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		assertEquals(2, d.getWeightForRow(0), 0.00000000001);
+		assertEquals(2, d.getWeightForRow(1), 0.00000000001);
+		assertEquals(1, d.getWeightForRow(2), 0.00000000001);
+		
+		//function should return null if the requested row doesn't exist
+		assertNull(d.getWeightForRow(3));
+		
+		f = new File("./testDataset.csv");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("input,input,output\r\n" + 
+					"1,1,0\r\n" + 
+					"2,3,5\r\n" + 
+					"4,4,4\r\n" + 
+					"");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+		d = null;
+		try {
+			d = new DataSet("./testDataset.csv");
+		}
+		catch(DataFormatException e) {
+			e.printStackTrace();
+		}
+		
+		//function should return null if the DataSet is unweighted
+		assertNull(d.getWeightForRow(0));
+		assertNull(d.getWeightForRow(1));
+		assertNull(d.getWeightForRow(2));
 		
 		f.delete();
 	}

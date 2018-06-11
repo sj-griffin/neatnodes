@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.DataFormatException;
 
 import javax.swing.SwingUtilities;
 
@@ -295,84 +296,54 @@ public class GlobalFunctions {
 		return result;
 	}
 	
-	//test the fitness of a genome for calculating XOR
-	protected static double testXORFitness(Genome g){
-		//there are 4 possible inputs to XOR. The fitness is a function of the differences between each of the 4 results and the expected output.
-		//outputs will be between 0 and 1
-		double[] i1 = {0.0, 0.0};
-		double[] r1 = runFunction(g, i1); //expected result 0
-		double[] i2 = {1.0, 1.0};
-		double[] r2 = runFunction(g, i2); //expected result 0
-		double[] i3 = {0.0, 1.0};
-		double[] r3 = runFunction(g, i3); //expected result 1
-		double[] i4 = {1.0, 0.0};
-		double[] r4 = runFunction(g, i4); //expected result 1
+	//test the fitness of a genome for computing a function represented by the supplied DataSet
+	//returns a fitness score out of 100, with 100 being a Genome that perfectly reproduces the DataSet, and 0 being a Genome that gets every result completely wrong
+	//if the entries in the DataSet do not align with what is expected by the genome, this function will throw an exception
+	protected static double testFitness(Genome g, DataSet d) {
+		//validate that the DataSet fits the Genome
+		if(d.getInputNumber() != g.getNumberOfInputs()) {
+			throw new GenomeException();
+		}
 		
-		//adding additional inputs to try and smooth the function and make it easier for it to get past the limits it can't get over
-		double[] i5 = {0.5, 0.5};
-		double[] r5 = runFunction(g, i5); //expected result 0.5
-		double[] i6 = {0.25, 0.75};
-		double[] r6 = runFunction(g, i6); //expected result 0.75
-		double[] i7 = {0.25, 0.25};
-		double[] r7 = runFunction(g, i7); //expected result 0.25
-		double[] i8 = {0.75, 0.25};
-		double[] r8 = runFunction(g, i8); //expected result 0.75
-		double[] i9 = {0.75, 0.75};
-		double[] r9 = runFunction(g, i9); //expected result 0.25
+		if(d.getOutputNumber() != g.getNumberOfOutputs()) {
+			throw new GenomeException();
+		}
 		
-		double[] i10 = {0.125, 0.125};
-		double[] r10 = runFunction(g, i10); //expected result 0.125
-		double[] i11 = {0.375, 0.375};
-		double[] r11 = runFunction(g, i11); //expected result 0.375
-		double[] i12 = {0.625, 0.375};
-		double[] r12 = runFunction(g, i12); //expected result 0.625
-		double[] i13 = {0.875, 0.125};
-		double[] r13 = runFunction(g, i13); //expected result 0.875
-		double[] i14 = {0.125, 0.875};
-		double[] r14 = runFunction(g, i14); //expected result 0.875
-		double[] i15 = {0.375, 0.625};
-		double[] r15 = runFunction(g, i15); //expected result 0.625
-		double[] i16 = {0.625, 0.625};
-		double[] r16 = runFunction(g, i16); //expected result 0.375
-		double[] i17 = {0.875, 0.875};
-		double[] r17 = runFunction(g, i17); //expected result 0.125
+		double totalDifference = 0.0; //tracks the accumulated difference between the expected set of outputs and the actual output		
+		double maxPossibleDifference = 0.0; //the total possible difference for when all results are completely wrong
 		
-		//the differences between each result and the expected result
-		
-		double d1 = Math.abs(r1[0] - 0.0);
-		double d2 = Math.abs(r2[0] - 0.0);
-		double d3 = Math.abs(r3[0] - 1.0);
-		double d4 = Math.abs(r4[0] - 1.0);
-		
-		double d5 = Math.abs(r5[0] - 0.5);
-		double d6 = Math.abs(r6[0] - 0.75);
-		double d7 = Math.abs(r7[0] - 0.25);
-		double d8 = Math.abs(r8[0] - 0.75);
-		double d9 = Math.abs(r9[0] - 0.25);
-		
-		double d10 = Math.abs(r10[0] - 0.125);
-		double d11 = Math.abs(r11[0] - 0.375);
-		double d12 = Math.abs(r12[0] - 0.625);
-		double d13 = Math.abs(r13[0] - 0.875);
-		double d14 = Math.abs(r14[0] - 0.875);
-		double d15 = Math.abs(r15[0] - 0.625);
-		double d16 = Math.abs(r16[0] - 0.375);
-		double d17 = Math.abs(r17[0] - 0.125);
-		
-		//the total difference. The maximum is 21.0, for when all answers are completely wrong.
-		//experimenting with doubling the weight of the 4 key input sets as they are the ones which count
-		double sum = 2*(d1 + d2 + d3 + d4) + d5 + d6 + d7 + d8 + d9 + d10 + d11 + d12 + d13 + d14 + d15 + d16 + d17;
+		//test the Genome against each entry in the DataSet
+		for(int i = 0; i < d.getNumberOfEntries(); i++) {
+			Double[] inputs = d.getInputsForRow(i);
+			Double[] result = runFunction(g, inputs);
+			Double[] expectedOutputs = d.getOutputsForRow(i);
+			Double weight = 1.0;
+			if(d.isWeighted()) {
+				weight = d.getWeightForRow(i);
+			}
+			maxPossibleDifference += (weight * d.getOutputNumber());
+			
+			//for each result, we find the difference between it and the expected output in that position, then add it to the total difference
+			//entries have an impact on the total difference proportional to their weight
+			for(int j = 0; j < expectedOutputs.length; j++) {
+				totalDifference += weight * (Math.abs(result[j] - expectedOutputs[j]));
+			}
+		}
 		
 		//the greater the difference, the lower the fitness
-		//we square it as in the paper to give proportionally more fitness the closer it is to a solution
-		//the maximum possible fitness should be 21^2 = 441
-		return Math.pow(21.0 - sum, 2);
+		//we square the result to give proportionally more fitness the closer it is to a solution
+		double rawFitnessScore = Math.pow(maxPossibleDifference - totalDifference, 2);
+		
+		//the maximum possible fitness should be the square of the maximum possible difference
+		//we use this to calculate a percentage representing how accurate the genome is
+		double maxPossibleFitness = Math.pow(maxPossibleDifference, 2);
+		return (rawFitnessScore / maxPossibleFitness) * 100.00;
 	}
 	
 	//runs the function implemented by the supplied genome with the specified inputs and returns the outputs
 	//the number of inputs must match what is expected by the genome or this method will throw an exception
 	//this function assumes that the genome has all its inputs in consecutive node positions starting from 1
-	protected static double[] runFunction(Genome g, double[] inputs) {
+	protected static Double[] runFunction(Genome g, Double[] inputs) {
 		if(inputs.length != g.getNumberOfInputs()) {
 			throw new GenomeException();
 		}
@@ -393,7 +364,7 @@ public class GlobalFunctions {
 		HashMap<Integer, Double> outputMap = g.readOutputs();
 		g.reset();
 		
-		double[] outputs = new double[outputMap.size()];
+		Double[] outputs = new Double[outputMap.size()];
 		int index = 0;
 		for(Integer key : outputMap.keySet()) {
 			outputs[index] = outputMap.get(key);
@@ -403,6 +374,13 @@ public class GlobalFunctions {
 	}
 	
 	public static void runSimulation() {
+		DataSet dataset = null;
+		try {
+			dataset = new DataSet("./XOR.csv");
+		} catch (DataFormatException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		InnovationManager iManager = new InnovationManager();
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		
@@ -422,7 +400,7 @@ public class GlobalFunctions {
 				ArrayList<Genome> currentGenomes = allSpecies.get(i).getGenomes();
 				for(int j = 0; j < currentGenomes.size(); j++){
 					Genome current = currentGenomes.get(j);
-					current.setFitness(testXORFitness(current));
+					current.setFitness(testFitness(current, dataset));
 					//System.out.println("Species: " + i + ", Genome: " + j + ", Fitness: " + current.getFitness());
 				}
 				allSpecies.get(i).calculateAverageFitness(); //calculate the average fitness of the species
@@ -518,13 +496,13 @@ public class GlobalFunctions {
 		
 		//print the results produced by the best genome
 		System.out.println("Simulation complete. The global champion produces the following results:");
-		double[] inputs1 = {0, 0};
+		Double[] inputs1 = {0.0, 0.0};
 		System.out.println("0,0: "+ runFunction(globalChampion, inputs1)[0]);
-		double[] inputs2 = {1, 1};
+		Double[] inputs2 = {1.0, 1.0};
 		System.out.println("1,1: "+ runFunction(globalChampion, inputs2)[0]);
-		double[] inputs3 = {0, 1};
+		Double[] inputs3 = {0.0, 1.0};
 		System.out.println("0,1: "+ runFunction(globalChampion, inputs3)[0]);
-		double[] inputs4 = {1, 0};
+		Double[] inputs4 = {1.0, 0.0};
 		System.out.println("1,0: "+ runFunction(globalChampion, inputs4)[0]);
 		System.out.println("Fitness: " + globalChampion.getFitness());
 		
