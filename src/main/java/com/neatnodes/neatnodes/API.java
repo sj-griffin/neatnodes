@@ -221,13 +221,12 @@ public class API {
 			for(int j = 0; j < inputs.length - 1; j++) {
 				System.out.print(doubleFormat.format(inputs[j]) + ", ");
 			}
-			System.out.print(inputs[inputs.length - 1] + ": ");
+			System.out.print(doubleFormat.format(inputs[inputs.length - 1]) + "-> ");
 			Double[] outputs = runFunction(globalChampion, inputs);
-			for(int j = 0; i < outputs.length - 1; j++) {
-				System.out.print(outputs[j] + ", ");
+			for(int j = 0; j < outputs.length - 1; j++) {
+				System.out.print(doubleFormat.format(outputs[j]) + ", ");
 			}
-			System.out.print(doubleFormat.format(outputs[outputs.length - 1]) + " ");
-			System.out.println();
+			System.out.println(doubleFormat.format(outputs[outputs.length - 1]));
 		}
 		System.out.println("Fitness: " + doubleFormat.format(globalChampion.getFitness()));
 		
@@ -250,7 +249,7 @@ public class API {
 	}
 	
 	public static void main(String[] args) {
-		runSimulation("NOT", "./datasets/NOT.csv");
+		runSimulation("Addition", "./datasets/Addition.csv");
 		
 		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/genome-92.31298566971546-2018-06-11-10-10-49-473.json");
 		//startRenderer(testGenome);
