@@ -25,7 +25,7 @@ class StaticFunctions {
 	
 	protected static final int initialPopulationSize = 150;
 	
-	protected static final int numberOfGenerations = 1000; // the number of generations to run the simulation for
+	protected static final int numberOfGenerations = 100; // the number of generations to run the simulation for
 	
 	protected static final double crossoverProportion = 0.75; //the fraction of offspring which are created by crossing two genomes. The rest are cloned from a single genome.
 	

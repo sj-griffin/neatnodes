@@ -1,6 +1,8 @@
 package com.neatnodes.neatnodes;
 
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.DataFormatException;
@@ -97,6 +99,7 @@ public class API {
 		}
 		InnovationManager iManager = new InnovationManager();
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
+		NumberFormat doubleFormat = new DecimalFormat("#0.00");  
 		
 		//setup an initial uniform population in an initial species
 		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), StaticFunctions.initialPopulationSize, iManager));
@@ -120,7 +123,7 @@ public class API {
 				globalFitnessSum += allSpecies.get(i).getAverageFitness(); //add the average fitness of the species to the sum of all average fitnesses
 			}
 			
-			System.out.println("Fitnesses calculated. Global fitness sum is " + globalFitnessSum);
+			System.out.println("Fitnesses calculated. Global fitness sum is " + doubleFormat.format(globalFitnessSum));
 
 			//go through each species and have it produce offspring for the next generation
 			ArrayList<Genome> nextGeneration = new ArrayList<Genome>(); //stores the next generation
@@ -167,7 +170,7 @@ public class API {
 				Genome representative = currentSpecies.getGenomes().get(randomIndex);
 				double maxFitness = currentSpecies.getMaxFitness();
 				int generationsWithoutImprovement = currentSpecies.getGenerationsWithoutImprovement() + 1;
-				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + maxFitness + ", Stagnant generations: " + generationsWithoutImprovement);
+				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + doubleFormat.format(maxFitness) + ", Stagnant generations: " + generationsWithoutImprovement);
 				allSpecies.remove(i);
 				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement));
 			}
@@ -206,18 +209,27 @@ public class API {
 			//reset the record of innovations for a new generation
 			iManager.newGeneration();
 		}
+		System.out.println("Simulation complete. The best genome produces the following results:");
 		
-		//print the results produced by the best genome
-		System.out.println("Simulation complete. The global champion produces the following results:");
-		Double[] inputs1 = {0.0, 0.0};
-		System.out.println("0,0: "+ runFunction(globalChampion, inputs1)[0]);
-		Double[] inputs2 = {1.0, 1.0};
-		System.out.println("1,1: "+ runFunction(globalChampion, inputs2)[0]);
-		Double[] inputs3 = {0.0, 1.0};
-		System.out.println("0,1: "+ runFunction(globalChampion, inputs3)[0]);
-		Double[] inputs4 = {1.0, 0.0};
-		System.out.println("1,0: "+ runFunction(globalChampion, inputs4)[0]);
-		System.out.println("Fitness: " + globalChampion.getFitness());
+		//print a sample of the results produced by the best genome
+		int entriesToShow = 4;
+		if(dataset.getNumberOfEntries() < 4) {
+			entriesToShow = dataset.getNumberOfEntries();
+		}
+		for(int i = 0; i < entriesToShow; i++) {
+			Double[] inputs = dataset.getInputsForRow(i);
+			for(int j = 0; j < inputs.length - 1; j++) {
+				System.out.print(doubleFormat.format(inputs[j]) + ", ");
+			}
+			System.out.print(inputs[inputs.length - 1] + ": ");
+			Double[] outputs = runFunction(globalChampion, inputs);
+			for(int j = 0; i < outputs.length - 1; j++) {
+				System.out.print(outputs[j] + ", ");
+			}
+			System.out.print(doubleFormat.format(outputs[outputs.length - 1]) + " ");
+			System.out.println();
+		}
+		System.out.println("Fitness: " + doubleFormat.format(globalChampion.getFitness()));
 		
 		//write the global champion to a file so it can be retrieved later
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
@@ -238,7 +250,7 @@ public class API {
 	}
 	
 	public static void main(String[] args) {
-		runSimulation("XOR", "./XOR.csv");
+		runSimulation("NOT", "./datasets/NOT.csv");
 		
 		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/genome-92.31298566971546-2018-06-11-10-10-49-473.json");
 		//startRenderer(testGenome);

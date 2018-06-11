@@ -787,7 +787,7 @@ public class Tests {
 	public void testAPITestFitness() {
 		DataSet d = null;
 		try {
-			d = new DataSet("./XOR.csv");
+			d = new DataSet("./datasets/XOR.csv");
 		} catch (DataFormatException e) {
 			e.printStackTrace();
 			fail();
