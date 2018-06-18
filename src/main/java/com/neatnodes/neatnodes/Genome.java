@@ -25,6 +25,7 @@ class Genome {
 		numberOfInputs = 0;
 		numberOfOutputs = 0;
 		
+		
 		fitness = 0.0; //fitness is considered to be not set if it is negative
 		fitnessMeasured = false;
 		
@@ -115,7 +116,8 @@ class Genome {
 	}
 	
 	//applies a set of mutations to the genome. Should be called after a new genome is bred.
-	protected void mutate(){
+	//takes a configuration object that it draws key values from
+	protected void mutate(Configuration configuration){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
 			throw new GenomeException();
@@ -127,13 +129,13 @@ class Genome {
 		}
 		
 		//the chance of each type of mutation occurring are set by global variables
-		if(Math.random() < StaticFunctions.weightMutationChance){
+		if(Math.random() < configuration.weightMutationChance){
 			mutateWeights();
 		}
-		if(Math.random() < StaticFunctions.nodeMutationChance){
+		if(Math.random() < configuration.nodeMutationChance){
 			nodeMutation();
 		}
-		if(Math.random() < StaticFunctions.linkMutationChance){
+		if(Math.random() < configuration.linkMutationChance){
 			linkMutation();
 		}
 	}
@@ -232,7 +234,7 @@ class Genome {
 	
 	//returns a clone of this genome with all the same nodes and connections represented by new objects. The new genome will have no fitness and be open for editing even if this one has already been locked.
 	protected Genome cloneGenome(){
-		Genome newGenome = new Genome(iManager);
+		Genome newGenome = new Genome(this.iManager);
 		for (Map.Entry<Integer, Node> node : nodeGenes.entrySet()){
 
 			Node n = node.getValue();

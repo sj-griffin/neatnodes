@@ -1,19 +1,23 @@
 package com.neatnodes.neatnodes;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.zip.DataFormatException;
 
 import javax.swing.SwingUtilities;
 
 public class API {
 	//runs the function implemented by the supplied genome with the specified inputs and returns the outputs
+	//depth is the number of iterations to run the genome for before reading off a result
 	//the number of inputs must match what is expected by the genome or this method will throw an exception
 	//this function assumes that the genome has all its inputs in consecutive node positions starting from 1
-	public static Double[] runFunction(Genome g, Double[] inputs) {
+	
+	public static Double[] runFunction(Genome g, Double[] inputs, int depth) {
 		if(inputs.length != g.getNumberOfInputs()) {
 			throw new GenomeException();
 		}
@@ -26,7 +30,7 @@ public class API {
 		g.writeInputs(inputMap);
 		
 		//run the genome for a preset number of cycles
-		for(int i = 0; i < StaticFunctions.depth; i++){
+		for(int i = 0; i < depth; i++){
 			g.run();
 		}
 		
@@ -45,8 +49,9 @@ public class API {
 	
 	//test the fitness of a genome for computing a function represented by the supplied DataSet
 	//returns a fitness score out of 100, with 100 being a Genome that perfectly reproduces the DataSet, and 0 being a Genome that gets every result completely wrong
+	//depth is the number of iterations to run each genome for before reading the output
 	//if the entries in the DataSet do not align with what is expected by the genome, this function will throw an exception
-	public static double testFitness(Genome g, DataSet d) {
+	public static double testFitness(Genome g, DataSet d, int depth) {
 		//validate that the DataSet fits the Genome
 		if(d.getInputNumber() != g.getNumberOfInputs()) {
 			throw new GenomeException();
@@ -62,7 +67,7 @@ public class API {
 		//test the Genome against each entry in the DataSet
 		for(int i = 0; i < d.getNumberOfEntries(); i++) {
 			Double[] inputs = d.getInputsForRow(i);
-			Double[] result = runFunction(g, inputs);
+			Double[] result = runFunction(g, inputs, depth);
 			Double[] expectedOutputs = d.getOutputsForRow(i);
 			Double weight = 1.0;
 			if(d.isWeighted()) {
@@ -89,7 +94,22 @@ public class API {
 	
 	//functionName is a name for the function represented by the test data
 	//dataSetPath is the path to a CSV file containing the dataset
-	public static void runSimulation(String functionName, String dataSetPath) {
+	//configPath is the path to a properties file
+	public static void runSimulation(String functionName, String dataSetPath, String configPath) {
+		Configuration c = null;
+		if(configPath == null) {
+			//create the configuration with the default settings if no config file is provided
+			c = new Configuration();
+		}
+		else {
+			try {
+				c = new Configuration(configPath);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
 		DataSet dataset = null;
 		try {
 			dataset = new DataSet(dataSetPath);
@@ -102,12 +122,12 @@ public class API {
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");  
 		
 		//setup an initial uniform population in an initial species
-		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), StaticFunctions.initialPopulationSize, iManager));
+		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), c.initialPopulationSize, iManager, c));
 		
 		Genome globalChampion = null;
 		
 		//run the simulation for the configured number of generations
-		for(int generation = 0; generation < StaticFunctions.numberOfGenerations; generation ++){
+		for(int generation = 0; generation < c.generations; generation ++){
 			System.out.println("Starting generation " + generation);
 						
 			double globalFitnessSum = 0.0; //the sum of all average fitnesses of all species
@@ -117,7 +137,7 @@ public class API {
 				ArrayList<Genome> currentGenomes = allSpecies.get(i).getGenomes();
 				for(int j = 0; j < currentGenomes.size(); j++){
 					Genome current = currentGenomes.get(j);
-					current.setFitness(testFitness(current, dataset));
+					current.setFitness(testFitness(current, dataset, c.depth));
 				}
 				allSpecies.get(i).calculateAverageFitness(); //calculate the average fitness of the species
 				globalFitnessSum += allSpecies.get(i).getAverageFitness(); //add the average fitness of the species to the sum of all average fitnesses
@@ -132,8 +152,8 @@ public class API {
 				//decide what proportion of the next generation each species will produce
 				//a species which contributes more to the globalFitnessSum gets to produce more of the offspring
 				double offspringPercentage = currentSpecies.getAverageFitness() / globalFitnessSum;
-				int numberOfOffspring = (int)Math.floor(offspringPercentage * StaticFunctions.initialPopulationSize);
-				int numberOfCrossovers = (int)Math.floor(numberOfOffspring * StaticFunctions.crossoverProportion);
+				int numberOfOffspring = (int)Math.floor(offspringPercentage * c.initialPopulationSize);
+				int numberOfCrossovers = (int)Math.floor(numberOfOffspring * c.crossoverProportion);
 				
 				//cull the weakest genomes from the species before breeding and retrieve the champion of the species
 				Genome champion = currentSpecies.cull();
@@ -172,7 +192,7 @@ public class API {
 				int generationsWithoutImprovement = currentSpecies.getGenerationsWithoutImprovement() + 1;
 				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + doubleFormat.format(maxFitness) + ", Stagnant generations: " + generationsWithoutImprovement);
 				allSpecies.remove(i);
-				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement));
+				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement, c));
 			}
 			System.out.println("Created species for the next generation");
 
@@ -190,7 +210,7 @@ public class API {
 				
 				//if the genome has not been accepted into any species, create a new one for it
 				if(!added){
-					Species newSpecies = new Species(currentGenome, 0.0, 0);
+					Species newSpecies = new Species(currentGenome, 0.0, 0, c);
 					newSpecies.addGenome(currentGenome);
 					allSpecies.add(newSpecies);
 				}
@@ -222,7 +242,7 @@ public class API {
 				System.out.print(doubleFormat.format(inputs[j]) + ", ");
 			}
 			System.out.print(doubleFormat.format(inputs[inputs.length - 1]) + "-> ");
-			Double[] outputs = runFunction(globalChampion, inputs);
+			Double[] outputs = runFunction(globalChampion, inputs, c.depth);
 			for(int j = 0; j < outputs.length - 1; j++) {
 				System.out.print(doubleFormat.format(outputs[j]) + ", ");
 			}
@@ -238,6 +258,11 @@ public class API {
 		JSONTools.writeGenomeToFile(globalChampion, outputPath, "Champion " + functionName + " genome, fitness: " + globalChampion.getFitness());
 	}
 	
+	//alternative runSimulation call that doesn't take a config file and just uses the default property values
+	public static void runSimulation(String functionName, String dataSetPath) {
+		runSimulation(functionName, dataSetPath, null);
+	}
+	
 	//start an instance of the renderer with the given genome
 	public static void startRenderer(Genome genome){
 		final Renderer mApplication = new Renderer(genome);
@@ -249,7 +274,9 @@ public class API {
 	}
 	
 	public static void main(String[] args) {
-		runSimulation("Addition", "./datasets/Addition.csv");
+		//runSimulation("Addition", "./datasets/XOR.csv"); //with defaults
+		runSimulation("Addition", "./datasets/XOR.csv", "./config.txt"); //with custom config
+
 		
 		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/genome-92.31298566971546-2018-06-11-10-10-49-473.json");
 		//startRenderer(testGenome);

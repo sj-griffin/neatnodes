@@ -463,8 +463,9 @@ public class Tests {
 	@Test
 	public void testSpeciesCreate() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
-		Species s = new Species(g1, 100, 0);
+		Species s = new Species(g1, 100, 0, configuration);
 		
 		assertEquals(100, s.getMaxFitness());
 		assertEquals(0, s.getGenerationsWithoutImprovement());
@@ -475,6 +476,7 @@ public class Tests {
 	@Test
 	public void testSpeciesAddGenome() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
@@ -484,7 +486,7 @@ public class Tests {
 		g1.addConnection(3, 2, 3, true, iManager.getInnovationNumber(3, 2));
 		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		
-		Species s = new Species(g1, 100, 0);
+		Species s = new Species(g1, 100, 0, configuration);
 		
 		//if the genomes have a compatability distance less than the compatability threshold (default 1.0), the add should succeed
 		Genome g2 = g1.cloneGenome();
@@ -520,6 +522,7 @@ public class Tests {
 	@Test
 	public void testSpeciesCalculateAverageFitness(){
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
@@ -535,7 +538,7 @@ public class Tests {
 		g2.setFitness(157);
 		g3.setFitness(302.87);
 		g4.setFitness(85.4222);
-		Species s = new Species(g1, 302.87, 0);
+		Species s = new Species(g1, 302.87, 0, configuration);
 		s.addGenome(g1);
 		s.addGenome(g2);
 		s.addGenome(g3);
@@ -549,6 +552,7 @@ public class Tests {
 	@Test
 	public void testSpeciesGetAverageFitness() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
@@ -559,7 +563,7 @@ public class Tests {
 		g1.addConnection(0, 3, 1, true, iManager.getInnovationNumber(0, 3));
 		g1.setFitness(30);
 
-		Species s = new Species(g1, 30, 0);
+		Species s = new Species(g1, 30, 0, configuration);
 		s.addGenome(g1);
 		
 		//get should fail if fitness hasn't been calculated yet
@@ -574,13 +578,14 @@ public class Tests {
 	@Test
 	public void testSpeciesCull() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
 		g1.addConnection(1, 2, 1, true, iManager.getInnovationNumber(1, 2));
 		g1.setFitness(45);
 		
-		Species s = new Species(g1, 131, 5);
+		Species s = new Species(g1, 131, 5, configuration);
 		s.addGenome(g1);
 		
 		Genome g2 = g1.cloneGenome();
@@ -652,6 +657,7 @@ public class Tests {
 	@Test
 	public void testStaticFunctionsCalculateCompatabilityDistance() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
@@ -666,7 +672,7 @@ public class Tests {
 		g2.addConnection(0, 2, 4.5, true, iManager.getInnovationNumber(0, 2));
 		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		
-		double result = StaticFunctions.calculateCompatabilityDistance(g1, g2);
+		double result = StaticFunctions.calculateCompatabilityDistance(g1, g2, configuration);
 		
 		assertEquals(2.4, result, 0.000000001);
 		
@@ -674,13 +680,14 @@ public class Tests {
 		Genome g4 = new Genome(iManager);
 		
 		//the calculation should throw an exception if either genome is empty
-		Executable testBlock = () -> { StaticFunctions.calculateCompatabilityDistance(g3, g4); };		
+		Executable testBlock = () -> { StaticFunctions.calculateCompatabilityDistance(g3, g4, configuration); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	
 	@Test
 	public void testStaticFunctionsBreed() {
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g1 = new Genome(iManager);
 		g1.addNode(1, Node.INPUT);
 		g1.addNode(2, Node.OUTPUT);
@@ -697,7 +704,7 @@ public class Tests {
 		g2.addConnection(1, 3, 3, true, iManager.getInnovationNumber(1, 3));
 		g2.setFitness(20);
 		
-		Genome offspring = StaticFunctions.breed(g1, g2, iManager);
+		Genome offspring = StaticFunctions.breed(g1, g2, iManager, configuration);
 		
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
@@ -722,7 +729,7 @@ public class Tests {
 		assertNull(c);
 		
 		//verify that we get the same results when g2 is the father instead of g1
-		offspring = StaticFunctions.breed(g2, g1, iManager);
+		offspring = StaticFunctions.breed(g2, g1, iManager, configuration);
 		assertEquals(2, offspring.getConnectionGenes().size());
 		assertEquals(4, offspring.getNodeGenes().size());
 		
@@ -746,7 +753,8 @@ public class Tests {
 	@Test
 	public void testStaticFunctionsSetupInitialSpecies() {
 		InnovationManager iManager = new InnovationManager();
-		Species s = StaticFunctions.setupInitialSpecies(3, 2, 5, iManager);
+		Configuration configuration = new Configuration();
+		Species s = StaticFunctions.setupInitialSpecies(3, 2, 5, iManager, configuration);
 		assertEquals(5, s.getGenomes().size());
 		assertFalse(s.isFinalised());
 		assertEquals(0, s.getGenerationsWithoutImprovement());
@@ -809,13 +817,14 @@ public class Tests {
 		g.addConnection(4, 3, -1.1832390685857468, true, iManager.getInnovationNumber(4, 3));
 		g.addConnection(1, 4, -1.0264579235753712, true, iManager.getInnovationNumber(1, 4));
 
-		assertEquals(92.82474446330792, API.testFitness(g, d), 0.00000000000001);
+		assertEquals(92.82474446330792, API.testFitness(g, d, 3), 0.00000000000001);
 	}
 	
 	@Test
 	public void testAPIRunFunction() {
 		//test with a genome that has been configured to calculate the XOR function
 		InnovationManager iManager = new InnovationManager();
+		Configuration configuration = new Configuration();
 		Genome g = new Genome(iManager);
 		g.addNode(1, Node.INPUT);
 		g.addNode(2, Node.INPUT);
@@ -834,27 +843,27 @@ public class Tests {
 		
 		Double[] inputs1 = {0.0, 0.0};
 		Double[] expectedOutputs1 = {0.05248796662764476};
-		assertArrayEquals(expectedOutputs1, API.runFunction(g, inputs1));
+		assertArrayEquals(expectedOutputs1, API.runFunction(g, inputs1, configuration.depth));
 		
 		Double[] inputs2 = {1.0, 1.0};
 		Double[] expectedOutputs2 = {0.08756708774628402};
-		assertArrayEquals(expectedOutputs2, API.runFunction(g, inputs2));
+		assertArrayEquals(expectedOutputs2, API.runFunction(g, inputs2, configuration.depth));
 		
 		Double[] inputs3 = {0.0, 1.0};
 		Double[] expectedOutputs3 = {0.9849160396696722};
-		assertArrayEquals(expectedOutputs3, API.runFunction(g, inputs3));
+		assertArrayEquals(expectedOutputs3, API.runFunction(g, inputs3, configuration.depth));
 		
 		Double[] inputs4 = {1.0, 0.0};
 		Double[] expectedOutputs4 = {0.9837502384439617};
-		assertArrayEquals(expectedOutputs4, API.runFunction(g, inputs4));
+		assertArrayEquals(expectedOutputs4, API.runFunction(g, inputs4, configuration.depth));
 		
 		//should fail if the inputs do not match what is defined in the genome
 		Double[] inputs5 = {1.0, 0.0, 1.0};
-		Executable testBlock = () -> { API.runFunction(g, inputs5); };		
+		Executable testBlock = () -> { API.runFunction(g, inputs5, configuration.depth); };		
 	    assertThrows(GenomeException.class, testBlock);
 	    
 		Double[] inputs6 = {1.0};
-		testBlock = () -> { API.runFunction(g, inputs6); };		
+		testBlock = () -> { API.runFunction(g, inputs6, configuration.depth); };		
 	    assertThrows(GenomeException.class, testBlock);
 	}
 	
@@ -1634,5 +1643,118 @@ public class Tests {
 		assertNull(d.getWeightForRow(2));
 		
 		f.delete();
+	}
+	
+	//Configuration tests
+	@Test
+	public void testConfigurationCreate() {
+		//test default values
+		Configuration configuration = new Configuration();
+		assertEquals(0.8, configuration.weightMutationChance);
+		assertEquals(0.03, configuration.nodeMutationChance);
+		assertEquals(0.05, configuration.linkMutationChance);
+		assertEquals(0.75, configuration.disableMutationChance);
+		assertEquals(1.0, configuration.c1);
+		assertEquals(1.0, configuration.c2);
+		assertEquals(0.4, configuration.c3);
+		assertEquals(1.0, configuration.compatabilityThreshold);
+		assertEquals(150, configuration.initialPopulationSize);
+		assertEquals(1000, configuration.generations);
+		assertEquals(0.75, configuration.crossoverProportion);
+		assertEquals(3, configuration.depth);
+		
+		//test default values when providing an empty configuration file
+		File f = new File("./testConfig.txt");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("# empty config file");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		try {
+			configuration = new Configuration("./testConfig.txt");
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		assertEquals(0.8, configuration.weightMutationChance);
+		assertEquals(0.03, configuration.nodeMutationChance);
+		assertEquals(0.05, configuration.linkMutationChance);
+		assertEquals(0.75, configuration.disableMutationChance);
+		assertEquals(1.0, configuration.c1);
+		assertEquals(1.0, configuration.c2);
+		assertEquals(0.4, configuration.c3);
+		assertEquals(1.0, configuration.compatabilityThreshold);
+		assertEquals(150, configuration.initialPopulationSize);
+		assertEquals(1000, configuration.generations);
+		assertEquals(0.75, configuration.crossoverProportion);
+		assertEquals(3, configuration.depth);
+		
+		//test custom values when providing a configuration file
+		f = new File("./testConfig.txt");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("WEIGHT_MUTATION_CHANCE=0.9\r\n" + 
+					"NODE_MUTATION_CHANCE=0.02\r\n" + 
+					"LINK_MUTATION_CHANCE=0.07\r\n" + 
+					"DISABLE_MUTATION_CHANCE=0.15\r\n" + 
+					"C1=2.0\r\n" + 
+					"C2=3.5\r\n" + 
+					"C3=0.8\r\n" + 
+					"# test comment\r\n" + 
+					"COMPATABILITY_THRESHOLD=2.25\r\n" + 
+					"INITIAL_POPULATION_SIZE=33\r\n" + 
+					"GENERATIONS=850\r\n" + 
+					"CROSSOVER_PROPORTION=2.3\r\n" + 
+					"DEPTH=7");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		try {
+			configuration = new Configuration("./testConfig.txt");
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		assertEquals(0.9, configuration.weightMutationChance);
+		assertEquals(0.02, configuration.nodeMutationChance);
+		assertEquals(0.07, configuration.linkMutationChance);
+		assertEquals(0.15, configuration.disableMutationChance);
+		assertEquals(2.0, configuration.c1);
+		assertEquals(3.5, configuration.c2);
+		assertEquals(0.8, configuration.c3);
+		assertEquals(2.25, configuration.compatabilityThreshold);
+		assertEquals(33, configuration.initialPopulationSize);
+		assertEquals(850, configuration.generations);
+		assertEquals(2.3, configuration.crossoverProportion);
+		assertEquals(7, configuration.depth);
+		
+		//create should fail if values are not the expected format
+		f = new File("./testConfig.txt");
+		try{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("WEIGHT_MUTATION_CHANCE=thisisastring\r\n");
+			bw.flush();
+			bw.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			fail();
+		}
+		
+	    Executable testBlock = () -> { new Configuration("./testConfig.txt"); };		
+	    assertThrows(RuntimeException.class, testBlock);
+	    
+	    f.delete();
 	}
 }

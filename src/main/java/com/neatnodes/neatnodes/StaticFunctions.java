@@ -1,44 +1,20 @@
 package com.neatnodes.neatnodes;
 
-import java.io.File;
-import java.sql.Timestamp;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.DataFormatException;
-
-import javax.swing.SwingUtilities;
 
 class StaticFunctions {
-	//the chances of various mutations occuring
-	protected static final double weightMutationChance = 0.8;
-	protected static final double nodeMutationChance = 0.03;
-	protected static final double linkMutationChance = 0.05;
-	protected static final double disableMutationChance = 0.75;
-	
-	//coefficients used to adjust the importance of the three factors used to calculate compatability distance
-	private static final double c1 = 1.0; //importance of E
-	private static final double c2 = 1.0; //importance of D
-	private static final double c3 = 0.4; //importance of W bar
-	
-	protected static final double compatabilityThreshold = 1.0; //called dt in the paper. default 3.0
-	
-	protected static final int initialPopulationSize = 150;
-	
-	protected static final int numberOfGenerations = 100; // the number of generations to run the simulation for
-	
-	protected static final double crossoverProportion = 0.75; //the fraction of offspring which are created by crossing two genomes. The rest are cloned from a single genome.
-	
-	protected static final int depth = 3; //controls the number of cycles to run each genome for before reading a result. It is the equivalent of the "depth" in a feed-forward network
-	
 	/**return the compatability distance between two genomes
+	 * taks a Configuration object that it draws key values from
 	*key variables:
 	*numberOfExcessGenes: the number of excess genes (E)
 	*numberOfDisjointGenes: the number of disjoint genes (D)
 	*averageWeightDifference: the average weight difference between matching genes, including disabled genes (W bar)
 	*maxGenes: the number of genes in the larger genme (N)
 	**/
-	protected static double calculateCompatabilityDistance(Genome g1, Genome g2){		
+	protected static double calculateCompatabilityDistance(Genome g1, Genome g2, Configuration configuration){		
 		HashMap<Integer, Connection> g1Genes = g1.getConnectionGenes();
 		HashMap<Integer, Connection> g2Genes = g2.getConnectionGenes();
 		
@@ -136,14 +112,15 @@ class StaticFunctions {
 		}
 		
 		//perform the calculation
-		double term1 = (c1 * numberOfExcessGenes)/maxGenes;
-		double term2 = (c2 * numberOfDisjointGenes)/maxGenes;
-		double term3 = c3 * averageWeightDifference;
+		double term1 = (configuration.c1 * numberOfExcessGenes)/maxGenes;
+		double term2 = (configuration.c2 * numberOfDisjointGenes)/maxGenes;
+		double term3 = configuration.c3 * averageWeightDifference;
 		return term1 + term2 + term3;
 	}
 	
 	//breed two genomes and return their offspring
-	protected static Genome breed(Genome father, Genome mother, InnovationManager iManager){
+	//takes a configuration object that it draws key values from
+	protected static Genome breed(Genome father, Genome mother, InnovationManager iManager, Configuration configuration){
 		Genome offspring = new Genome(iManager);
 		
 		//fail if the fitness of either parent has not been set
@@ -193,7 +170,7 @@ class StaticFunctions {
 				//if the connection is disabled in either parent, there is a 75% chance that it will be disabled in the offspring
 				boolean offspringGeneEnabled = true;
 				if(!fatherGene.isEnabled() || !motherGene.isEnabled()){
-					if(Math.random() < StaticFunctions.disableMutationChance){
+					if(Math.random() < configuration.disableMutationChance){
 						offspringGeneEnabled = false;
 					}
 				}
@@ -212,7 +189,7 @@ class StaticFunctions {
 					//if the connection is disabled in the parent, there is a 75% chance that it will be disabled in the offspring
 					boolean offspringGeneEnabled = true;
 					if(!fatherGene.isEnabled()){
-						if(Math.random() < StaticFunctions.disableMutationChance){
+						if(Math.random() < configuration.disableMutationChance){
 							offspringGeneEnabled = false;
 						}
 					}
@@ -231,7 +208,7 @@ class StaticFunctions {
 					//if the connection is disabled in the parent, there is a 75% chance that it will be disabled in the offspring
 					boolean offspringGeneEnabled = true;
 					if(!motherGene.isEnabled()){
-						if(Math.random() < StaticFunctions.disableMutationChance){
+						if(Math.random() < configuration.disableMutationChance){
 							offspringGeneEnabled = false;
 						}
 					}
@@ -266,7 +243,7 @@ class StaticFunctions {
 	//set up an initial population of genomes with the specified number of inputs and outputs in an initial species
 	//we start with a uniform population with no hidden nodes
 	//takes a populationSize which is the number of genomes to create
-	protected static Species setupInitialSpecies(int inputs, int outputs, int populationSize, InnovationManager iManager) {
+	protected static Species setupInitialSpecies(int inputs, int outputs, int populationSize, InnovationManager iManager, Configuration configuration) {
 		Genome baseGenome = new Genome(iManager);
 		//create the input nodes
 		for(int i = 1; i <= inputs; i++) {
@@ -285,7 +262,7 @@ class StaticFunctions {
 			}
 		}
 		
-		Species result = new Species(baseGenome, 0.0, 0);
+		Species result = new Species(baseGenome, 0.0, 0, configuration);
 		
 		//add the initial population to the first species
 		for(int i = 0; i < populationSize; i++){

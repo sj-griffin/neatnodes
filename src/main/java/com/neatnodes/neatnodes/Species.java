@@ -16,13 +16,16 @@ class Species {
 	
 	private int generationsWithoutImprovement; //the number of generations since the maxFitness was last increased
 	
-	protected Species(Genome representativeGenome, double maxFitness, int generationsWithoutImprovement){
+	private Configuration configuration;
+	
+	protected Species(Genome representativeGenome, double maxFitness, int generationsWithoutImprovement, Configuration configuration){
 		this.representativeGenome = representativeGenome;
 		this.genomes = new ArrayList<Genome>();
 		this.averageFitness = 0.0;
 		this.finalised = false;
 		this.maxFitness = maxFitness;
 		this.generationsWithoutImprovement = generationsWithoutImprovement;
+		this.configuration = configuration;
 	}
 	
 	//attempts to add a genome to the species. The genome will only be added if it falls within the compatability threshold for the species.
@@ -33,8 +36,8 @@ class Species {
 			throw new GenomeException();
 		}
 		
-		double compatabilityDistance = StaticFunctions.calculateCompatabilityDistance(g, representativeGenome);
-		if(compatabilityDistance <= StaticFunctions.compatabilityThreshold){
+		double compatabilityDistance = StaticFunctions.calculateCompatabilityDistance(g, representativeGenome, this.configuration);
+		if(compatabilityDistance <= this.configuration.compatabilityThreshold){
 			genomes.add(g);
 			return true;
 		}
@@ -100,8 +103,8 @@ class Species {
 		}
 		
 		//breed them and apply a mutation to the offspring
-		Genome offspring = StaticFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex), iManager);
-		offspring.mutate();
+		Genome offspring = StaticFunctions.breed(this.genomes.get(fatherIndex), this.genomes.get(motherIndex), iManager, this.configuration);
+		offspring.mutate(configuration);
 		
 		return offspring;
 	}
