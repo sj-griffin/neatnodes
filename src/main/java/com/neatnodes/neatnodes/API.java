@@ -92,10 +92,9 @@ public class API {
 		return (rawFitnessScore / maxPossibleFitness) * 100.00;
 	}
 	
-	//functionName is a name for the function represented by the test data
 	//dataSetPath is the path to a CSV file containing the dataset
 	//configPath is the path to a properties file
-	public static void runSimulation(String functionName, String dataSetPath, String configPath) {
+	public static Genome runSimulation(String dataSetPath, String configPath) {
 		Configuration c = null;
 		if(configPath == null) {
 			//create the configuration with the default settings if no config file is provided
@@ -249,36 +248,31 @@ public class API {
 			System.out.println(doubleFormat.format(outputs[outputs.length - 1]));
 		}
 		System.out.println("Fitness: " + doubleFormat.format(globalChampion.getFitness()));
+		return globalChampion;
+	}
+	
+	//alternative runSimulation call that doesn't take a config file and just uses the default property values
+	public static Genome runSimulation(String dataSetPath) {
+		return runSimulation(dataSetPath, null);
+	}
+	
+	public static void renderGenome(Genome g) {
+		GenomeRenderer.renderGenome(g);
+	}
+	
+	public static void main(String[] args) {
+		String functionName = "XOR";
+		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv"); //with defaults
+		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", "./config.txt"); //with custom config
 		
 		//write the global champion to a file so it can be retrieved later
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
 		//the fitness comes first in the filename so that files can be sorted by fitness
 		String timestamp = new Timestamp(System.currentTimeMillis()).toString().replace(' ', '.').replace(':', '.').replace('.', '-');
-		String outputPath = "C:/genomes/" + functionName + "-" + globalChampion.getFitness() + "-" + timestamp + ".json";
-		JSONTools.writeGenomeToFile(globalChampion, outputPath, "Champion " + functionName + " genome, fitness: " + globalChampion.getFitness());
-	}
-	
-	//alternative runSimulation call that doesn't take a config file and just uses the default property values
-	public static void runSimulation(String functionName, String dataSetPath) {
-		runSimulation(functionName, dataSetPath, null);
-	}
-	
-	//start an instance of the renderer with the given genome
-	public static void startRenderer(Genome genome){
-		final Renderer mApplication = new Renderer(genome);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				mApplication.initApp();
-			}
-		});
-	}
-	
-	public static void main(String[] args) {
-		//runSimulation("Addition", "./datasets/XOR.csv"); //with defaults
-		runSimulation("Addition", "./datasets/XOR.csv", "./config.txt"); //with custom config
-
+		String outputPath = "C:/genomes/" + functionName + "-" + testGenome.getFitness() + "-" + timestamp + ".json";
+		JSONTools.writeGenomeToFile(testGenome, outputPath, "Champion " + functionName + " genome, fitness: " + testGenome.getFitness());
 		
 		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/genome-92.31298566971546-2018-06-11-10-10-49-473.json");
-		//startRenderer(testGenome);
+		renderGenome(testGenome);
 	}
 }

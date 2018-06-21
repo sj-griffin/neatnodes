@@ -1,0 +1,41 @@
+graph {
+	fill-color: black;
+}
+	
+node {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	shadow-mode: gradient-radial;
+	shadow-offset: 0px;
+	shadow-width: 50px;
+	size: 20px;
+}	
+
+node.bias_node {
+	fill-color: purple;
+	shadow-color: purple, rgba(0, 0, 0, 0);
+}
+
+node.input_node {
+	fill-color: green;
+	shadow-color: green, rgba(0, 0, 0, 0);
+}
+
+node.output_node {
+	fill-color: red;
+	shadow-color: red, rgba(0, 0, 0, 0);
+}
+
+node.hidden_node {
+	fill-color: yellow;
+	shadow-color: yellow, rgba(0, 0, 0, 0);
+}
+
+edge {
+	fill-color: white;
+	shape: angle;
+	size: 2px;
+	arrow-shape: none;
+	text-color: white;
+}
