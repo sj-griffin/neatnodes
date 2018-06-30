@@ -1,0 +1,31 @@
+graph {
+	fill-color: black;
+}
+	
+node {
+	size: 3px;
+	shape: circle;
+}	
+
+node.bias_node {
+	fill-color: purple;
+}
+
+node.input_node {
+	fill-color: green;
+}
+
+node.output_node {
+	fill-color: red;
+}
+
+node.hidden_node {
+	fill-color: yellow;
+}
+
+edge {
+	fill-color: white;
+	text-mode: hidden;
+	arrow-shape: none;
+	size: 0px;
+}

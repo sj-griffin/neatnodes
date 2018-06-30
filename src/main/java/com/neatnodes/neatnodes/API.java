@@ -6,7 +6,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.zip.DataFormatException;
 
 import javax.swing.SwingUtilities;
@@ -94,7 +97,7 @@ public class API {
 	
 	//dataSetPath is the path to a CSV file containing the dataset
 	//configPath is the path to a properties file
-	public static Genome runSimulation(String dataSetPath, String configPath) {
+	public static Genome runSimulation(String dataSetPath, String configPath, boolean visualize) {
 		Configuration c = null;
 		if(configPath == null) {
 			//create the configuration with the default settings if no config file is provided
@@ -118,7 +121,14 @@ public class API {
 		}
 		InnovationManager iManager = new InnovationManager();
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
-		NumberFormat doubleFormat = new DecimalFormat("#0.00");  
+		NumberFormat doubleFormat = new DecimalFormat("#0.00");
+		
+		Queue<Runnable> commandQueue = new LinkedList<>(); //stores the commands that will be executed by the GenomeRenderer
+		final GenomeRenderer renderer = new GenomeRenderer("lossy", commandQueue);
+
+		if(visualize) {
+			new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
+		}
 		
 		//setup an initial uniform population in an initial species
 		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), c.initialPopulationSize, iManager, c));
@@ -157,6 +167,15 @@ public class API {
 				//cull the weakest genomes from the species before breeding and retrieve the champion of the species
 				Genome champion = currentSpecies.cull();
 				
+				//render the surviving genomes in the species if visualize mode is on
+				if(visualize) {
+					ArrayList<Genome> remainingGenomes = currentSpecies.getGenomes();
+					for(Genome g : remainingGenomes) {
+						//queue the command so that it will be picked up by the GenomeRenderer thread
+						commandQueue.add(() -> renderer.renderGenome(g));
+					}
+				}
+				
 				//set the global champion for this generation if necessary				
 				if(globalChampion == null || champion.getFitness() > globalChampion.getFitness()){
 					globalChampion = champion;
@@ -165,7 +184,7 @@ public class API {
 				//if the species has more than 5 members, copy the champion to the next generation unchanged
 				if(currentSpecies.getGenomes().size() > 5){
 					nextGeneration.add(champion);
-					//reduce the number of offspring by 1 to accomodate this
+					//reduce the number of offspring by 1 to accommodate this
 					numberOfOffspring --;
 				}
 				
@@ -227,7 +246,27 @@ public class API {
 
 			//reset the record of innovations for a new generation
 			iManager.newGeneration();
+			
+			//if visualization mode is enabled, notify the renderer that a new generation has started
+			if(visualize) {
+				//queue the command so that it will be picked up by the GenomeRenderer thread
+				commandQueue.add(() -> renderer.newGeneration());
+			}
 		}
+		
+		//switch off the renderer auto layout feature once all genomes have been rendered to stop them drifting out of their grid formation
+		if(visualize) {
+			//sleep for 5 seconds to give the auto-layout time to work
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//queue the command so that it will be picked up by the GenomeRenderer thread
+			commandQueue.add(() -> renderer.autoLayoutOn(false));
+		}
+		
 		System.out.println("Simulation complete. The best genome produces the following results:");
 		
 		//print a sample of the results produced by the best genome
@@ -252,18 +291,18 @@ public class API {
 	}
 	
 	//alternative runSimulation call that doesn't take a config file and just uses the default property values
-	public static Genome runSimulation(String dataSetPath) {
-		return runSimulation(dataSetPath, null);
+	public static Genome runSimulation(String dataSetPath, boolean visualize) {
+		return runSimulation(dataSetPath, null, visualize);
 	}
 	
-	public static void renderGenome(Genome g) {
+/*	public static void renderGenome(Genome g) {
 		GenomeRenderer.renderGenome(g);
-	}
+	}*/
 	
 	public static void main(String[] args) {
 		String functionName = "XOR";
-		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv"); //with defaults
-		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", "./config.txt"); //with custom config
+		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", true); //with defaults
+		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", "./config.txt", true); //with custom config
 		
 		//write the global champion to a file so it can be retrieved later
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
@@ -272,7 +311,10 @@ public class API {
 		String outputPath = "C:/genomes/" + functionName + "-" + testGenome.getFitness() + "-" + timestamp + ".json";
 		JSONTools.writeGenomeToFile(testGenome, outputPath, "Champion " + functionName + " genome, fitness: " + testGenome.getFitness());
 		
-		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/genome-92.31298566971546-2018-06-11-10-10-49-473.json");
-		renderGenome(testGenome);
+		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/XOR-93.12877329362878-2018-06-23-11-17-09-02.json");
+		
+		//display the champion genome
+		//GenomeRenderer r = new GenomeRenderer("glow");
+		//r.renderGenome(testGenome);
 	}
 }

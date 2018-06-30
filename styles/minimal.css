@@ -1,0 +1,32 @@
+graph {
+	fill-color: black;
+}
+	
+node {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	size: 10px;
+	shape: circle;
+}	
+
+node.bias_node {
+	stroke-color: purple;
+}
+
+node.input_node {
+	stroke-color: green;
+}
+
+node.output_node {
+	stroke-color: red;
+}
+
+node.hidden_node {
+	stroke-color: yellow;
+}
+
+edge {
+	fill-color: white;
+	text-color: white;
+}

@@ -146,11 +146,6 @@ class Species {
 			quicksort(input, first, pivotIndex - 1);
 
 			quicksort(input, pivotIndex + 1, last);
-			
-			/*System.out.println("COMPLETED SORT:");
-			for(int i = 0; i < input.length; i ++){
-				System.out.println(input[i].getFitness());
-			}*/
 		}
 	}
 	

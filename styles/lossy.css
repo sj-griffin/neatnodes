@@ -1,0 +1,17 @@
+graph {
+	fill-color: black;
+}
+	
+node {
+	size: 3px;
+	shape: circle;
+	fill-color: white;
+	text-mode: hidden;
+}	
+
+edge {
+	fill-color: white;
+	text-mode: hidden;
+	arrow-shape: none;
+	size: 0px;
+}

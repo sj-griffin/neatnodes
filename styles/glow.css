@@ -10,6 +10,7 @@ node {
 	shadow-offset: 0px;
 	shadow-width: 50px;
 	size: 20px;
+	shape: circle;
 }	
 
 node.bias_node {
