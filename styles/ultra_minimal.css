@@ -29,3 +29,18 @@ edge {
 	arrow-shape: none;
 	size: 0px;
 }
+
+sprite.generation_label {
+	text-color: white;
+	text-background-mode: rounded-box;
+	text-background-color: purple;
+	text-padding: 2px;
+}
+
+sprite.generation_marker {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	fill-mode: none;
+	z-index: -1; /*by setting the z index to -1 we ensure that the markers are rendered behind everything else*/
+}

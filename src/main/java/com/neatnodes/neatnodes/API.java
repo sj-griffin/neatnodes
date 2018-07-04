@@ -6,10 +6,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.zip.DataFormatException;
 
 import javax.swing.SwingUtilities;
@@ -123,8 +121,8 @@ public class API {
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");
 		
-		Queue<Runnable> commandQueue = new LinkedList<>(); //stores the commands that will be executed by the GenomeRenderer
-		final GenomeRenderer renderer = new GenomeRenderer("lossy", commandQueue);
+		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
+		final GenomeRenderer renderer = new GenomeRenderer("ultra_minimal", commandQueue);
 
 		if(visualize) {
 			new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
@@ -169,10 +167,12 @@ public class API {
 				
 				//render the surviving genomes in the species if visualize mode is on
 				if(visualize) {
+					//commandQueue.push(() -> renderer.addGenomeToCurrentGeneration(champion));
 					ArrayList<Genome> remainingGenomes = currentSpecies.getGenomes();
 					for(Genome g : remainingGenomes) {
 						//queue the command so that it will be picked up by the GenomeRenderer thread
-						commandQueue.add(() -> renderer.renderGenome(g));
+						commandQueue.push(() -> renderer.addGenomeToCurrentGeneration(g));
+						//System.out.println("Pushed a command: " + commandQueue.getSize());
 					}
 				}
 				
@@ -250,12 +250,22 @@ public class API {
 			//if visualization mode is enabled, notify the renderer that a new generation has started
 			if(visualize) {
 				//queue the command so that it will be picked up by the GenomeRenderer thread
-				commandQueue.add(() -> renderer.newGeneration());
+				System.out.println("Adding newGeneration to command queue");
+				commandQueue.push(() -> renderer.newGeneration());
+				//System.out.println("Pushed a command: " + commandQueue.getSize());
+
+				//sleep for 5 seconds to give the auto-positioning time to work
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		
 		//switch off the renderer auto layout feature once all genomes have been rendered to stop them drifting out of their grid formation
-		if(visualize) {
+		/*if(visualize) {
 			//sleep for 5 seconds to give the auto-layout time to work
 			try {
 				Thread.sleep(5000);
@@ -265,7 +275,7 @@ public class API {
 			}
 			//queue the command so that it will be picked up by the GenomeRenderer thread
 			commandQueue.add(() -> renderer.autoLayoutOn(false));
-		}
+		}*/
 		
 		System.out.println("Simulation complete. The best genome produces the following results:");
 		

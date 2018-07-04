@@ -18,7 +18,7 @@ COMPATABILITY_THRESHOLD=1.0
 INITIAL_POPULATION_SIZE=150
 
 # the number of generations to run the simulation for
-GENERATIONS=100
+GENERATIONS=20
 
 # the fraction of offspring which are created by crossing two genomes. The rest are cloned from a single genome.
 CROSSOVER_PROPORTION=0.75
