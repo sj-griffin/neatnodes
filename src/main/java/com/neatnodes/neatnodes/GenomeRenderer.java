@@ -1,5 +1,6 @@
 package com.neatnodes.neatnodes;
 
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -16,6 +17,7 @@ import java.util.Queue;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.geom.Point3;
+import org.graphstream.ui.graphicGraph.GraphicElement;
 import org.graphstream.ui.spriteManager.Sprite;
 import org.graphstream.ui.spriteManager.SpriteManager;
 import org.graphstream.ui.swingViewer.DefaultView;
@@ -65,6 +67,17 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		this.viewer = this.graph.display();
 		this.view = viewer.getDefaultView();
 		
+		//remove all the default mouse listeners. This disables unwanted features like selection boxes and the ability to drag nodes and sprites
+		MouseListener[] mouseListeners = this.view.getMouseListeners();
+		for(MouseListener m : mouseListeners){
+			this.view.removeMouseListener(m);
+		}
+		
+		MouseMotionListener[] motionListeners = this.view.getMouseMotionListeners();
+		for(MouseMotionListener m : motionListeners){
+			this.view.removeMouseMotionListener(m);
+		}
+		
 		//listener to perform panning
 		this.view.addMouseListener(new MouseListener() {
 
@@ -86,7 +99,6 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());
-				view.endSelectionAt(0, 0); //this disables the selection box that displays by default
 			}
 
 			@Override
@@ -114,7 +126,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				
                 panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());
 			}
-
+			
 			@Override
 			public void mouseMoved(MouseEvent e) {
 			}
@@ -189,10 +201,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		while(loop) {
 			this.fromViewer.pump();
 			
-
 			Runnable command = commandQueue.pop();
 			if(command != null) {
-				//System.out.println("Popped a command: " + commandQueue.getSize());
 				command.run();
 			}
 			
@@ -214,16 +224,12 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				for(Sprite s : spriteManager) {
 					if(s.getAttribute("ui.class") == "generation_marker") {
 						double radius = s.getAttribute("radius");
-						s.setAttribute("ui.style", "size: " + (radius * 2 * ratio + 50) + "px;");
-						s.setPosition(0, 0, 0); //this ensures that markers cannot be dragged out of position with the mouse					
+						s.setAttribute("ui.style", "size: " + (radius * 2 * ratio + 50) + "px;");				
 					}
 				}
-				
-				//loopNum = 0; //make the loopNum reuseable so it doesn't hit the maximum value 
 			}
 			loopNum ++;
 		}
-
 	}
 	
 	//adds a genome object to the current generation
