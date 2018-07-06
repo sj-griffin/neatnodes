@@ -8,10 +8,23 @@ node {
 	stroke-width: 1px;
 	shadow-mode: gradient-radial;
 	shadow-offset: 0px;
-	shadow-width: 50px;
-	size: 20px;
 	shape: circle;
-}	
+}
+
+node.large {
+	size: 15px;
+	shadow-width: 50px;
+}
+
+node.medium {
+	size: 6px;
+	shadow-width: 25px;
+}
+
+node.small {
+	size: 3px;
+	shadow-width: 10px;
+}
 
 node.bias_node {
 	fill-color: purple;
@@ -36,7 +49,36 @@ node.hidden_node {
 edge {
 	fill-color: white;
 	shape: angle;
-	size: 2px;
 	arrow-shape: none;
 	text-color: white;
+}
+
+edge.large {
+	text-mode: normal;
+	size: 5px;
+}
+
+edge.medium {
+	text-mode: hidden;
+	size: 3px;
+}
+
+edge.small {
+	text-mode: hidden;
+	size: 1px;
+}
+
+sprite.generation_label {
+	text-color: white;
+	text-background-mode: rounded-box;
+	text-background-color: purple;
+	text-padding: 2px;
+}
+
+sprite.generation_marker {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	fill-mode: none;
+	z-index: -1; /*by setting the z index to -1 we ensure that the markers are rendered behind everything else*/
 }

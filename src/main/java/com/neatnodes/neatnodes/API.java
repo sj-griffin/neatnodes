@@ -122,7 +122,7 @@ public class API {
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");
 		
 		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
-		final GenomeRenderer renderer = new GenomeRenderer("ultra_minimal", commandQueue);
+		final GenomeRenderer renderer = new GenomeRenderer("normal", commandQueue);
 
 		if(visualize) {
 			new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
@@ -167,12 +167,10 @@ public class API {
 				
 				//render the surviving genomes in the species if visualize mode is on
 				if(visualize) {
-					//commandQueue.push(() -> renderer.addGenomeToCurrentGeneration(champion));
 					ArrayList<Genome> remainingGenomes = currentSpecies.getGenomes();
 					for(Genome g : remainingGenomes) {
 						//queue the command so that it will be picked up by the GenomeRenderer thread
 						commandQueue.push(() -> renderer.addGenomeToCurrentGeneration(g));
-						//System.out.println("Pushed a command: " + commandQueue.getSize());
 					}
 				}
 				
@@ -250,9 +248,7 @@ public class API {
 			//if visualization mode is enabled, notify the renderer that a new generation has started
 			if(visualize) {
 				//queue the command so that it will be picked up by the GenomeRenderer thread
-				System.out.println("Adding newGeneration to command queue");
 				commandQueue.push(() -> renderer.newGeneration());
-				//System.out.println("Pushed a command: " + commandQueue.getSize());
 
 				//sleep for 5 seconds to give the auto-positioning time to work
 				try {
@@ -265,17 +261,17 @@ public class API {
 		}
 		
 		//switch off the renderer auto layout feature once all genomes have been rendered to stop them drifting out of their grid formation
-		/*if(visualize) {
-			//sleep for 5 seconds to give the auto-layout time to work
+		if(visualize) {
+			//sleep for 15 seconds to give the auto-layout time to work
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(15000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			//queue the command so that it will be picked up by the GenomeRenderer thread
-			commandQueue.add(() -> renderer.autoLayoutOn(false));
-		}*/
+			commandQueue.push(() -> renderer.autoLayoutOn(false));
+		}
 		
 		System.out.println("Simulation complete. The best genome produces the following results:");
 		

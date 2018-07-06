@@ -4,18 +4,35 @@ graph {
 }
 	
 node {
-	stroke-mode: plain;
 	stroke-color: white;
-	stroke-width: 1px;
 	shadow-mode: gradient-radial;
 	shadow-offset: 0px;
-	shadow-width: 15px;
 	shadow-color: white, rgba(0, 0, 0, 0);
 	fill-color: rgba(0, 0, 0, 0);
-	stroke-width: 3px;
-	size: 10px;
 	shape: circle;
-}	
+}
+
+node.large {
+	size: 15px;
+	shadow-width: 50px;
+	stroke-mode: plain;
+	stroke-width: 3px;
+	text-mode: normal;
+}
+
+node.medium {
+	size: 6px;
+	shadow-width: 25px;
+	stroke-mode: none;
+	text-mode: hidden;
+}
+
+node.small {
+	size: 3px;
+	shadow-width: 10px;
+	stroke-mode: none;
+	text-mode: hidden;
+}
 
 node.bias_node {
 	stroke-color: purple;
@@ -36,4 +53,35 @@ node.hidden_node {
 edge {
 	fill-color: white;
 	text-color: white;
+	size: 0px;
+}
+
+edge.large {
+	text-mode: normal;
+	arrow-shape: arrow;
+}
+
+edge.medium {
+	text-mode: hidden;
+	arrow-shape: none;
+}
+
+edge.small {
+	text-mode: hidden;
+	arrow-shape: none;
+}
+
+sprite.generation_label {
+	text-color: white;
+	text-background-mode: rounded-box;
+	text-background-color: purple;
+	text-padding: 2px;
+}
+
+sprite.generation_marker {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	fill-mode: none;
+	z-index: -1; /*by setting the z index to -1 we ensure that the markers are rendered behind everything else*/
 }

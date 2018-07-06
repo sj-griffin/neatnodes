@@ -46,6 +46,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	private SpriteManager spriteManager;
 	
 	private double zoomLevel;
+	private double lastZoomLevel; //used to track zoom level changes for optimization purposes
 	private Point3 panPoint;
 	
 	private CommandQueue commandQueue;
@@ -124,7 +125,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				DefaultView dView = (DefaultView)view;
 				dView.render(graphics);
 				
-                panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());
+                panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());    
 			}
 			
 			@Override
@@ -153,6 +154,20 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 					view.getCamera().setViewPercent(zoomLevel);
 				}
 				
+				
+				if(lastZoomLevel <= 0.5 && zoomLevel > 0.5) {
+					setSizeClasses("small");
+				}
+				else if(lastZoomLevel >= 0.5 && zoomLevel < 0.5) {
+					setSizeClasses("medium");
+				}
+				else if(lastZoomLevel <= 0.15 && zoomLevel > 0.15) {
+					setSizeClasses("medium");
+				}
+				else if(lastZoomLevel >= 0.15 && zoomLevel < 0.15) {
+					setSizeClasses("large");
+				}
+								
 				//this is a convoluted way of calling pushView() on the camera so that it will update its metrics to take the zoom we just performed into account
 				//if we don't do this it won't be able to transform the coordinates properly in the next stanza
 				Graphics2D graphics = (Graphics2D)view.getGraphics();
@@ -163,6 +178,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				Point3 mousePosPostZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
 				Point3 delta = new Point3(mousePosPostZoom.x - mousePosPreZoom.x, mousePosPostZoom.y - mousePosPreZoom.y);
 				view.getCamera().setViewCenter(viewCentrePreZoom.x - delta.x, viewCentrePreZoom.y - delta.y, 0);				
+							
+				lastZoomLevel = zoomLevel;
 			}
 		});
 
@@ -218,15 +235,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 						n.setAttribute("y", (Double)n.getAttribute("final-y"));
 					}
 				}
-				
-				//resize generation markers as they must change size with the camera position
-				double ratio = this.view.getCamera().getMetrics().ratioPx2Gu; //we use this ratio to convert graph units into pixel units
-				for(Sprite s : spriteManager) {
-					if(s.getAttribute("ui.class") == "generation_marker") {
-						double radius = s.getAttribute("radius");
-						s.setAttribute("ui.style", "size: " + (radius * 2 * ratio + 50) + "px;");				
-					}
-				}
+				resizeGenerationMarkers();
 			}
 			loopNum ++;
 		}
@@ -268,7 +277,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				throw new GenomeException();
 			}
 			n.addAttribute("ui.label", currentNode.getLabel());
-			
+			n.setAttribute("ui.class", n.getAttribute("ui.class") + ", small");
+
 			//we explicitly set the position of the first node in each genome in order to visually separate generations
 			//the other nodes are positioned automatically around it
 			if(currentNode.getLabel() == 0) {
@@ -291,6 +301,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			String inNodeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getInNode().getLabel());
 			String outNodeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getOutNode().getLabel());
 			org.graphstream.graph.Edge e = this.graph.addEdge(edgeName, inNodeName, outNodeName, true);
+			e.setAttribute("ui.class", e.getAttribute("ui.class") + ", small");
 			e.addAttribute("ui.label", doubleFormat.format(currentConnection.getWeight()));
 		}
 		this.genomesRendered ++;
@@ -299,7 +310,6 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	
 	//renders all genomes in the current generation before beginning a new one
 	public void newGeneration() {
-		System.out.println("New generation called");
 		int size = this.currentGeneration.size();
 		double radius = this.generation * 20; //the distance from the centre in graph units that this generation will be displayed at
 		double spreadAngle = Math.toRadians(360.0 / size); //the angle in degrees required between each genome
@@ -308,7 +318,6 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			double angle = spreadAngle * i;
 			double x = Math.cos(angle) * radius;
 			double y = Math.sin(angle) * radius;
-			//System.out.println(x + "," + y);
 			
 			renderGenome(currentGeneration.get(i), x, y);
 		}
@@ -341,6 +350,30 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		}
 	}
 	
+	//sets the size class of every node and edge on the graph
+	//this will replace any existing classes on each node/edge except for the first one
+	private void setSizeClasses(String newSize) {
+		for(org.graphstream.graph.Node node : graph.getEachNode()) {
+			String currentValue = ((String)node.getAttribute("ui.class")).split(", ")[0];
+			node.setAttribute("ui.class", currentValue + ", " + newSize);
+		}
+		for(org.graphstream.graph.Edge edge : graph.getEachEdge()) {
+			String currentValue = ((String)edge.getAttribute("ui.class")).split(", ")[0];
+			edge.setAttribute("ui.class", currentValue + ", " + newSize);
+		}
+	}
+	
+	//resize generation markers so that they change size with the camera position
+	//this should be called whenever the camera is moved or zoomed
+	private void resizeGenerationMarkers() {
+		double ratio = this.view.getCamera().getMetrics().ratioPx2Gu; //we use this ratio to convert graph units into pixel units
+		for(Sprite s : spriteManager) {
+			if(s.getAttribute("ui.class") == "generation_marker") {
+				double radius = s.getAttribute("radius");
+				s.setAttribute("ui.style", "size: " + (radius * 2 * ratio + 50) + "px;");				
+			}
+		}
+	}
 	
 	public static void main(String[] args) {
 		//GenomeRenderer renderer = new GenomeRenderer("ultra_minimal");

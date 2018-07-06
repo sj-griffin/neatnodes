@@ -3,30 +3,53 @@ graph {
 }
 	
 node {
-	stroke-mode: plain;
-	stroke-color: white;
-	stroke-width: 1px;
-	size: 10px;
 	shape: circle;
-}	
-
-node.bias_node {
-	stroke-color: purple;
+	fill-color: white;
+	text-mode: hidden;
 }
 
-node.input_node {
-	stroke-color: green;
+node.large {
+	size: 15px;
 }
 
-node.output_node {
-	stroke-color: red;
+node.medium {
+	size: 6px;
 }
 
-node.hidden_node {
-	stroke-color: yellow;
+node.small {
+	size: 3px;
 }
 
 edge {
 	fill-color: white;
 	text-color: white;
+	arrow-shape: none;
+	size: 0px;
+}
+
+edge.large {
+	text-mode: normal;
+}
+
+edge.medium {
+	text-mode: hidden;
+}
+
+edge.small {
+	text-mode: hidden;
+}
+
+sprite.generation_label {
+	text-color: white;
+	text-background-mode: rounded-box;
+	text-background-color: purple;
+	text-padding: 2px;
+}
+
+sprite.generation_marker {
+	stroke-mode: plain;
+	stroke-color: white;
+	stroke-width: 1px;
+	fill-mode: none;
+	z-index: -1; /*by setting the z index to -1 we ensure that the markers are rendered behind everything else*/
 }
