@@ -1,6 +1,7 @@
 package com.neatnodes.neatnodes;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -27,6 +28,9 @@ public class Configuration {
 	
 	private static final String defaultDepth = "3"; //controls the number of cycles to run each genome for before reading a result. It is the equivalent of the "depth" in a feed-forward network		
 	
+	private static final String defaultStylePath = "./styles"; //controls the path that the GenomeRenderer will look for stylesheets in
+	private static final String defaultRenderStyle = "normal"; //controls the stylesheet that will be used when renderering genomes
+	
 	protected final double weightMutationChance;
 	protected final double nodeMutationChance;
 	protected final double linkMutationChance;
@@ -39,9 +43,11 @@ public class Configuration {
 	protected final int generations;
 	protected final double crossoverProportion;
 	protected final int depth;
+	protected final String stylePath;
+	protected final String renderStyle;
 	
 	//takes a path to a properties files that will override the default values
-	protected Configuration(String propertiesFile) throws IOException {
+	protected Configuration(String propertiesFile) {
 		//create default properties object
 		Properties defaultProps = new Properties();
 		defaultProps.setProperty("WEIGHT_MUTATION_CHANCE", defaultWeightMutationChance);
@@ -56,13 +62,22 @@ public class Configuration {
 		defaultProps.setProperty("GENERATIONS", defaultGenerations);
 		defaultProps.setProperty("CROSSOVER_PROPORTION", defaultCrossoverProportion);
 		defaultProps.setProperty("DEPTH", defaultDepth);
+		defaultProps.setProperty("STYLE_PATH", defaultStylePath);
+		defaultProps.setProperty("RENDER_STYLE", defaultRenderStyle);
+
 		Properties properties = new Properties(defaultProps);
 
 		//create properties object from the supplied file
-		FileInputStream in = new FileInputStream(propertiesFile);
-		properties.load(in);
-		in.close();
-				
+		
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propertiesFile);
+			properties.load(in);
+			in.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to read the properties file. This may mean that the filepath is invalid.");
+		}
+
 		//load properties from either the supplied file or the defaults and cast them to the correct type
 		try {
 			this.weightMutationChance = Double.parseDouble(properties.getProperty("WEIGHT_MUTATION_CHANCE"));
@@ -77,6 +92,8 @@ public class Configuration {
 			this.generations = Integer.parseInt(properties.getProperty("GENERATIONS"));
 			this.crossoverProportion = Double.parseDouble(properties.getProperty("CROSSOVER_PROPORTION"));
 			this.depth = Integer.parseInt(properties.getProperty("DEPTH"));
+			this.stylePath = properties.getProperty("STYLE_PATH");
+			this.renderStyle = properties.getProperty("RENDER_STYLE");
 		}
 		catch(NumberFormatException e) {
 			throw new RuntimeException("Invalid values found in configuration file");
@@ -97,5 +114,7 @@ public class Configuration {
 		this.generations = Integer.parseInt(Configuration.defaultGenerations);
 		this.crossoverProportion = Double.parseDouble(Configuration.defaultCrossoverProportion);
 		this.depth = Integer.parseInt(Configuration.defaultDepth);
+		this.stylePath = Configuration.defaultStylePath;
+		this.renderStyle = Configuration.defaultRenderStyle;
 	}
 }

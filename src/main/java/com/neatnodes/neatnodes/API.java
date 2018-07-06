@@ -95,21 +95,7 @@ public class API {
 	
 	//dataSetPath is the path to a CSV file containing the dataset
 	//configPath is the path to a properties file
-	public static Genome runSimulation(String dataSetPath, String configPath, boolean visualize) {
-		Configuration c = null;
-		if(configPath == null) {
-			//create the configuration with the default settings if no config file is provided
-			c = new Configuration();
-		}
-		else {
-			try {
-				c = new Configuration(configPath);
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-		}
+	public static Genome runSimulation(String dataSetPath, Configuration c, boolean visualize) {
 		DataSet dataset = null;
 		try {
 			dataset = new DataSet(dataSetPath);
@@ -122,7 +108,7 @@ public class API {
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");
 		
 		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
-		final GenomeRenderer renderer = new GenomeRenderer("normal", commandQueue);
+		final GenomeRenderer renderer = new GenomeRenderer(c.stylePath, c.renderStyle, commandQueue, true);
 
 		if(visualize) {
 			new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
@@ -296,19 +282,19 @@ public class API {
 		return globalChampion;
 	}
 	
-	//alternative runSimulation call that doesn't take a config file and just uses the default property values
-	public static Genome runSimulation(String dataSetPath, boolean visualize) {
-		return runSimulation(dataSetPath, null, visualize);
+	public static void viewGenome(Genome g, Configuration c) {
+		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
+		final GenomeRenderer renderer = new GenomeRenderer(c.stylePath, c.renderStyle, commandQueue, false);
+		new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
+		commandQueue.push(() -> renderer.renderGenome(g, null, null, "large"));
 	}
-	
-/*	public static void renderGenome(Genome g) {
-		GenomeRenderer.renderGenome(g);
-	}*/
 	
 	public static void main(String[] args) {
 		String functionName = "XOR";
-		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", true); //with defaults
-		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", "./config.txt", true); //with custom config
+		Configuration configuration = new Configuration("./config.txt");
+
+		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", configuration, true); //with defaults
+		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", configuration, true); //with custom config
 		
 		//write the global champion to a file so it can be retrieved later
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
@@ -318,9 +304,6 @@ public class API {
 		JSONTools.writeGenomeToFile(testGenome, outputPath, "Champion " + functionName + " genome, fitness: " + testGenome.getFitness());
 		
 		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/XOR-93.12877329362878-2018-06-23-11-17-09-02.json");
-		
-		//display the champion genome
-		//GenomeRenderer r = new GenomeRenderer("glow");
-		//r.renderGenome(testGenome);
+		viewGenome(testGenome, configuration); //display the champion genome
 	}
 }

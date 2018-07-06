@@ -1675,13 +1675,9 @@ public class Tests {
 			e.printStackTrace();
 			fail();
 		}
-		try {
-			configuration = new Configuration("./testConfig.txt");
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			fail();
-		}
+
+		configuration = new Configuration("./testConfig.txt");
+
 		assertEquals(0.8, configuration.weightMutationChance);
 		assertEquals(0.03, configuration.nodeMutationChance);
 		assertEquals(0.05, configuration.linkMutationChance);
@@ -1694,6 +1690,9 @@ public class Tests {
 		assertEquals(1000, configuration.generations);
 		assertEquals(0.75, configuration.crossoverProportion);
 		assertEquals(3, configuration.depth);
+		assertEquals("./styles", configuration.stylePath);
+		assertEquals("normal", configuration.renderStyle);
+
 		
 		//test custom values when providing a configuration file
 		f = new File("./testConfig.txt");
@@ -1711,7 +1710,9 @@ public class Tests {
 					"INITIAL_POPULATION_SIZE=33\r\n" + 
 					"GENERATIONS=850\r\n" + 
 					"CROSSOVER_PROPORTION=2.3\r\n" + 
-					"DEPTH=7");
+					"DEPTH=7\r\n" +
+					"STYLE_PATH=C:/styles\r\n" + 
+					"RENDER_STYLE=glow");
 			bw.flush();
 			bw.close();
 		}
@@ -1719,13 +1720,9 @@ public class Tests {
 			e.printStackTrace();
 			fail();
 		}
-		try {
-			configuration = new Configuration("./testConfig.txt");
-		}
-		catch(IOException e){
-			e.printStackTrace();
-			fail();
-		}
+
+		configuration = new Configuration("./testConfig.txt");
+
 		assertEquals(0.9, configuration.weightMutationChance);
 		assertEquals(0.02, configuration.nodeMutationChance);
 		assertEquals(0.07, configuration.linkMutationChance);
@@ -1738,6 +1735,8 @@ public class Tests {
 		assertEquals(850, configuration.generations);
 		assertEquals(2.3, configuration.crossoverProportion);
 		assertEquals(7, configuration.depth);
+		assertEquals("C:/styles", configuration.stylePath);
+		assertEquals("glow", configuration.renderStyle);
 		
 		//create should fail if values are not the expected format
 		f = new File("./testConfig.txt");

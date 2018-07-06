@@ -51,7 +51,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	
 	private CommandQueue commandQueue;
 	
-	public GenomeRenderer(String style, CommandQueue commandQueue) {
+	//interactive is a flag which will enable panning and zooming if it is checked
+	public GenomeRenderer(String stylePath, String style, CommandQueue commandQueue, boolean interactive) {
 		this.genomesRendered = 0;
 		this.generation = 1;
 		this.currentGeneration = new ArrayList<Genome>();
@@ -59,7 +60,12 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		this.panPoint = new Point3(0,0);
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		this.graph = new MultiGraph("GenomeGraph");
-		graph.addAttribute("ui.stylesheet", "url('./styles/" + style + ".css')");
+		
+		if(stylePath.endsWith("/")) {
+			stylePath = stylePath.substring(0, stylePath.length() - 1);
+		}
+		graph.addAttribute("ui.stylesheet", "url('" + stylePath + "/" + style + ".css')");
+		System.out.println((String)graph.getAttribute("ui.stylesheet"));
 		//graph.addAttribute("ui.quality");
 		//graph.addAttribute("ui.antialias");
 		
@@ -79,109 +85,113 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			this.view.removeMouseMotionListener(m);
 		}
 		
-		//listener to perform panning
-		this.view.addMouseListener(new MouseListener() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
+		//we only apply mouse listeners in interactive mode
+		if(interactive) {
+			//listener to perform panning
+			this.view.addMouseListener(new MouseListener() {
+	
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					
+				}
+	
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					
+				}
+	
+				@Override
+				public void mouseExited(MouseEvent e) {
+					
+				}
+	
+				@Override
+				public void mousePressed(MouseEvent e) {
+					panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());
+				}
+	
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					panPoint = new Point3(0,0);
+				}
 				
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-				
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-				panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				panPoint = new Point3(0,0);
-			}
+			});
 			
-		});
-		
-		this.view.addMouseMotionListener(new MouseMotionListener() {
-
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				Point3 transformedMousePos = view.getCamera().transformPxToGu(e.getX(), e.getY());
-                double deltaX = transformedMousePos.x - panPoint.x;
-                double deltaY = transformedMousePos.y - panPoint.y;
-                Point3 currentViewCentre = view.getCamera().getViewCenter();
-                view.getCamera().setViewCenter(currentViewCentre.x - deltaX, currentViewCentre.y - deltaY, 0);
-                
-				//this is a convoluted way of calling pushView() on the camera so that it will update its metrics to take the recentre we just performed into account
-                //if we don't do this it won't be able to transform the coordinates in the next step improperly which causes a jittering effect
-                Graphics2D graphics = (Graphics2D)view.getGraphics();
-				DefaultView dView = (DefaultView)view;
-				dView.render(graphics);
+			this.view.addMouseMotionListener(new MouseMotionListener() {
+	
+				@Override
+				public void mouseDragged(MouseEvent e) {
+					Point3 transformedMousePos = view.getCamera().transformPxToGu(e.getX(), e.getY());
+	                double deltaX = transformedMousePos.x - panPoint.x;
+	                double deltaY = transformedMousePos.y - panPoint.y;
+	                Point3 currentViewCentre = view.getCamera().getViewCenter();
+	                view.getCamera().setViewCenter(currentViewCentre.x - deltaX, currentViewCentre.y - deltaY, 0);
+	                
+					//this is a convoluted way of calling pushView() on the camera so that it will update its metrics to take the recentre we just performed into account
+	                //if we don't do this it won't be able to transform the coordinates in the next step improperly which causes a jittering effect
+	                Graphics2D graphics = (Graphics2D)view.getGraphics();
+					DefaultView dView = (DefaultView)view;
+					dView.render(graphics);
+					
+	                panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());    
+				}
 				
-                panPoint = view.getCamera().transformPxToGu(e.getX(), e.getY());    
-			}
+				@Override
+				public void mouseMoved(MouseEvent e) {
+				}
+				
+			});
 			
-			@Override
-			public void mouseMoved(MouseEvent e) {
-			}
-			
-		});
-		
-		//listener to perform zooming
-		this.view.addMouseWheelListener(new MouseWheelListener() {
-			public void mouseWheelMoved(MouseWheelEvent e) {
-				Point2D rawMousePos = e.getPoint();
-				Point3 viewCentrePreZoom = view.getCamera().getViewCenter();
-				Point3 mousePosPreZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
-
-				//perform the zoom
-				if (e.getWheelRotation() == -1) {
-					zoomLevel = zoomLevel - 0.1 * zoomLevel;
-					if (zoomLevel < 0.01) {
-						zoomLevel = 0.01;
+			//listener to perform zooming
+			this.view.addMouseWheelListener(new MouseWheelListener() {
+				public void mouseWheelMoved(MouseWheelEvent e) {
+					Point2D rawMousePos = e.getPoint();
+					Point3 viewCentrePreZoom = view.getCamera().getViewCenter();
+					Point3 mousePosPreZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
+	
+					//perform the zoom
+					if (e.getWheelRotation() == -1) {
+						zoomLevel = zoomLevel - 0.1 * zoomLevel;
+						if (zoomLevel < 0.01) {
+							zoomLevel = 0.01;
+						}
+						view.getCamera().setViewPercent(zoomLevel);
 					}
-					view.getCamera().setViewPercent(zoomLevel);
-				}
-				if (e.getWheelRotation() == 1) {
-					zoomLevel = zoomLevel + 0.1 * zoomLevel;
-					view.getCamera().setViewPercent(zoomLevel);
-				}
-				
-				
-				if(lastZoomLevel <= 0.5 && zoomLevel > 0.5) {
-					setSizeClasses("small");
-				}
-				else if(lastZoomLevel >= 0.5 && zoomLevel < 0.5) {
-					setSizeClasses("medium");
-				}
-				else if(lastZoomLevel <= 0.15 && zoomLevel > 0.15) {
-					setSizeClasses("medium");
-				}
-				else if(lastZoomLevel >= 0.15 && zoomLevel < 0.15) {
-					setSizeClasses("large");
-				}
+					if (e.getWheelRotation() == 1) {
+						zoomLevel = zoomLevel + 0.1 * zoomLevel;
+						view.getCamera().setViewPercent(zoomLevel);
+					}
+					
+					
+					if(lastZoomLevel <= 0.5 && zoomLevel > 0.5) {
+						setSizeClasses("small");
+					}
+					else if(lastZoomLevel >= 0.5 && zoomLevel < 0.5) {
+						setSizeClasses("medium");
+					}
+					else if(lastZoomLevel <= 0.15 && zoomLevel > 0.15) {
+						setSizeClasses("medium");
+					}
+					else if(lastZoomLevel >= 0.15 && zoomLevel < 0.15) {
+						setSizeClasses("large");
+					}
+									
+					//this is a convoluted way of calling pushView() on the camera so that it will update its metrics to take the zoom we just performed into account
+					//if we don't do this it won't be able to transform the coordinates properly in the next stanza
+					Graphics2D graphics = (Graphics2D)view.getGraphics();
+					DefaultView dView = (DefaultView)view;
+					dView.render(graphics);
+					
+					//adjust the camera view centre so that the mouse remains in the same position on the graph after the zoom
+					Point3 mousePosPostZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
+					Point3 delta = new Point3(mousePosPostZoom.x - mousePosPreZoom.x, mousePosPostZoom.y - mousePosPreZoom.y);
+					view.getCamera().setViewCenter(viewCentrePreZoom.x - delta.x, viewCentrePreZoom.y - delta.y, 0);				
 								
-				//this is a convoluted way of calling pushView() on the camera so that it will update its metrics to take the zoom we just performed into account
-				//if we don't do this it won't be able to transform the coordinates properly in the next stanza
-				Graphics2D graphics = (Graphics2D)view.getGraphics();
-				DefaultView dView = (DefaultView)view;
-				dView.render(graphics);
-				
-				//adjust the camera view centre so that the mouse remains in the same position on the graph after the zoom
-				Point3 mousePosPostZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
-				Point3 delta = new Point3(mousePosPostZoom.x - mousePosPreZoom.x, mousePosPostZoom.y - mousePosPreZoom.y);
-				view.getCamera().setViewCenter(viewCentrePreZoom.x - delta.x, viewCentrePreZoom.y - delta.y, 0);				
-							
-				lastZoomLevel = zoomLevel;
-			}
-		});
+					lastZoomLevel = zoomLevel;
+				}
+			});
+		
+		}
 
 		// We connect back the viewer to the graph,
 		// the graph becomes a sink for the viewer.
@@ -250,7 +260,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	
 	//takes a genome object and renders it on the graph with its bias node at the graph coordinates specified
 	//if null is given for either coordinate, that coordinate will be selected automatically by GraphStream
-	public void renderGenome(Genome g, Double xPos, Double yPos) {
+	//styleSize determines the initial size class the genome will use, which will determine its style. Valid values are small, medium, or large.
+	public void renderGenome(Genome g, Double xPos, Double yPos, String styleSize) {
 		HashMap<Integer, Connection> connections = g.getConnectionGenes();
 		HashMap<Integer, Node> nodes = g.getNodeGenes();
 		
@@ -277,7 +288,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				throw new GenomeException();
 			}
 			n.addAttribute("ui.label", currentNode.getLabel());
-			n.setAttribute("ui.class", n.getAttribute("ui.class") + ", small");
+			n.setAttribute("ui.class", n.getAttribute("ui.class") + ", " + styleSize);
 
 			//we explicitly set the position of the first node in each genome in order to visually separate generations
 			//the other nodes are positioned automatically around it
@@ -301,7 +312,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			String inNodeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getInNode().getLabel());
 			String outNodeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getOutNode().getLabel());
 			org.graphstream.graph.Edge e = this.graph.addEdge(edgeName, inNodeName, outNodeName, true);
-			e.setAttribute("ui.class", e.getAttribute("ui.class") + ", small");
+			e.setAttribute("ui.class", e.getAttribute("ui.class") + ", " + styleSize);
 			e.addAttribute("ui.label", doubleFormat.format(currentConnection.getWeight()));
 		}
 		this.genomesRendered ++;
@@ -319,7 +330,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			double x = Math.cos(angle) * radius;
 			double y = Math.sin(angle) * radius;
 			
-			renderGenome(currentGeneration.get(i), x, y);
+			renderGenome(currentGeneration.get(i), x, y, "small");
 		}
 		
 		//add sprites
