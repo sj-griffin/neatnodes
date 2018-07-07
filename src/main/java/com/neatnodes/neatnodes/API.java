@@ -248,9 +248,9 @@ public class API {
 		
 		//switch off the renderer auto layout feature once all genomes have been rendered to stop them drifting out of their grid formation
 		if(visualize) {
-			//sleep for 15 seconds to give the auto-layout time to work
+			//sleep for 10 seconds to give the auto-layout time to work
 			try {
-				Thread.sleep(15000);
+				Thread.sleep(10000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -294,16 +294,16 @@ public class API {
 		Configuration configuration = new Configuration("./config.txt");
 
 		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", configuration, true); //with defaults
-		Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", configuration, true); //with custom config
+		//Genome testGenome = runSimulation("./datasets/" + functionName + ".csv", configuration, true); //with custom config
 		
 		//write the global champion to a file so it can be retrieved later
 		//the filename has a unique timestamp so it doesn't overwrite other genomes
 		//the fitness comes first in the filename so that files can be sorted by fitness
-		String timestamp = new Timestamp(System.currentTimeMillis()).toString().replace(' ', '.').replace(':', '.').replace('.', '-');
-		String outputPath = "C:/genomes/" + functionName + "-" + testGenome.getFitness() + "-" + timestamp + ".json";
-		JSONTools.writeGenomeToFile(testGenome, outputPath, "Champion " + functionName + " genome, fitness: " + testGenome.getFitness());
+		//String timestamp = new Timestamp(System.currentTimeMillis()).toString().replace(' ', '.').replace(':', '.').replace('.', '-');
+		//String outputPath = "C:/genomes/" + functionName + "-" + testGenome.getFitness() + "-" + timestamp + ".json";
+		//JSONTools.writeGenomeToFile(testGenome, outputPath, "Champion " + functionName + " genome, fitness: " + testGenome.getFitness());
 		
-		//Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/XOR-93.12877329362878-2018-06-23-11-17-09-02.json");
+		Genome testGenome = JSONTools.readGenomeFromFile("C:/genomes/XOR-93.12877329362878-2018-06-23-11-17-09-02.json");
 		viewGenome(testGenome, configuration); //display the champion genome
 	}
 }

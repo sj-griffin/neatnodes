@@ -51,7 +51,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	
 	private CommandQueue commandQueue;
 	
-	//interactive is a flag which will enable panning and zooming if it is checked
+	//interactive is a flag which will enable panning and zooming if true, and enable GraphStream's default mouse behaviour if false
 	public GenomeRenderer(String stylePath, String style, CommandQueue commandQueue, boolean interactive) {
 		this.genomesRendered = 0;
 		this.generation = 1;
@@ -65,28 +65,26 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			stylePath = stylePath.substring(0, stylePath.length() - 1);
 		}
 		graph.addAttribute("ui.stylesheet", "url('" + stylePath + "/" + style + ".css')");
-		System.out.println((String)graph.getAttribute("ui.stylesheet"));
 		//graph.addAttribute("ui.quality");
-		//graph.addAttribute("ui.antialias");
+		graph.addAttribute("ui.antialias");
 		
 		spriteManager = new SpriteManager(this.graph);
 		
 		this.viewer = this.graph.display();
 		this.view = viewer.getDefaultView();
 		
-		//remove all the default mouse listeners. This disables unwanted features like selection boxes and the ability to drag nodes and sprites
-		MouseListener[] mouseListeners = this.view.getMouseListeners();
-		for(MouseListener m : mouseListeners){
-			this.view.removeMouseListener(m);
-		}
-		
-		MouseMotionListener[] motionListeners = this.view.getMouseMotionListeners();
-		for(MouseMotionListener m : motionListeners){
-			this.view.removeMouseMotionListener(m);
-		}
-		
-		//we only apply mouse listeners in interactive mode
 		if(interactive) {
+			//remove all the default mouse listeners. This disables unwanted features like selection boxes and the ability to drag nodes and sprites
+			MouseListener[] mouseListeners = this.view.getMouseListeners();
+			for(MouseListener m : mouseListeners){
+				this.view.removeMouseListener(m);
+			}
+			
+			MouseMotionListener[] motionListeners = this.view.getMouseMotionListeners();
+			for(MouseMotionListener m : motionListeners){
+				this.view.removeMouseMotionListener(m);
+			}
+
 			//listener to perform panning
 			this.view.addMouseListener(new MouseListener() {
 	
@@ -210,11 +208,9 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	}
 
 	public void buttonPushed(String id) {
-		System.out.println("Button pushed on node "+id);
 	}
 
 	public void buttonReleased(String id) {
-		System.out.println("Button released on node "+id);
 	}
 	
 	@Override

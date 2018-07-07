@@ -14,16 +14,19 @@ node {
 node.large {
 	size: 15px;
 	shadow-width: 50px;
+	text-mode: normal;
 }
 
 node.medium {
 	size: 6px;
 	shadow-width: 25px;
+	text-mode: hidden;
 }
 
 node.small {
 	size: 3px;
 	shadow-width: 10px;
+	text-mode: hidden;
 }
 
 node.bias_node {
