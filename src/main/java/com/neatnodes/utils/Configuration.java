@@ -1,0 +1,196 @@
+package com.neatnodes.utils;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+//
+/**
+ * Configuration objects parse configuration files and store the parameters used by the NEAT algorithm.
+ * Configuration files must follow the Java property file format. The following is a list of valid properties 
+ * that will be picked up by this class and their default values:
+ * <pre>
+ * 
+ * WEIGHT_MUTATION_CHANCE=0.8
+ * NODE_MUTATION_CHANCE=0.03
+ * LINK_MUTATION_CHANCE=0.05
+ * DISABLE_MUTATION_CHANCE=0.75
+ * C1=1.0
+ * C2=1.0
+ * C3=0.4
+ * COMPATABILITY_THRESHOLD=1.0
+ * INITIAL_POPULATION_SIZE=150
+ * GENERATIONS=1000
+ * CROSSOVER_PROPORTION=0.75
+ * DEPTH=3
+ * STYLE_PATH=./styles
+ * RENDER_STYLE=normal
+ * </pre>
+ * 
+ * @author Sam Griffin
+ */
+public class Configuration {
+	static final String defaultWeightMutationChance = "0.8";
+	static final String defaultNodeMutationChance = "0.03";
+	static final String defaultLinkMutationChance = "0.05";
+	static final String defaultDisableMutationChance = "0.75";
+	static final String defaultC1 = "1.0";
+	static final String defaultC2 = "1.0";
+	static final String defaultC3 = "0.4";
+	static final String defaultCompatabilityThreshold = "1.0";
+	static final String defaultInitialPopulationSize = "150";
+	static final String defaultGenerations = "1000";
+	static final String defaultCrossoverProportion = "0.75";
+	static final String defaultDepth = "3";
+	static final String defaultStylePath = "./styles";
+	static final String defaultRenderStyle = "normal";
+	
+	/**
+	 * The chance of a weight mutation occurring.
+	 */
+	public final double weightMutationChance;
+	/**
+	 * The chance of a node mutation occurring.
+	 */
+	public final double nodeMutationChance;
+	/**
+	 * The chance of a link mutation occurring.
+	 */
+	public final double linkMutationChance;
+	/**
+	 * The chance of a disable mutation occurring.
+	 */
+	public final double disableMutationChance;
+	
+	/**
+	 * A coefficient used to adjust the importance of the E term when calculating compatibility distance.
+	 */
+	public final double c1;
+	
+	/**
+	 * A coefficient used to adjust the importance of the D term when calculating compatibility distance.
+	 */
+	public final double c2;
+	
+	/**
+	 * A coefficient used to adjust the importance of the "W bar" term when calculating compatibility distance.
+	 */
+	public final double c3;
+	
+	/**
+	 * The compatibility threshold used to determine whether a Genome qualifies as a member of a Species.
+	 */
+	public final double compatabilityThreshold;
+	
+	/**
+	 * The number of Genomes in the initial population used to begin the NEAT algorithm.
+	 */
+	public final int initialPopulationSize;
+	
+	/**
+	 * The number of generations to run the NEAT algorithm for
+	 */
+	public final int generations;
+	
+	/**
+	 *  The fraction of offspring which are created by crossing two Genomes. The rest are cloned from a 
+	 *  single Genome.
+	 */
+	public final double crossoverProportion;
+	
+	/**
+	 * The number of cycles to run each Genome for before reading a result. It is the equivalent of the 
+	 * "depth" in a feed-forward network.
+	 */
+	public final int depth;
+	
+	/**
+	 * The path that the GenomeRenderer will look for style sheets in.
+	 */
+	public final String stylePath;
+	
+	/**
+	 * The name of the style that the GenomeRenderer will use to display Genomes. The name must correspond 
+	 * to a style sheet.
+	 */
+	public final String renderStyle;
+	
+	/**
+	 * Creates a new Configuration from a properties file. Any parameters not listed in the file will be
+	 * assigned their default values.
+	 * @param propertiesFile
+	 * 		The path to the properties file.
+	 */
+	public Configuration(String propertiesFile) {
+		//create default properties object
+		Properties defaultProps = new Properties();
+		defaultProps.setProperty("WEIGHT_MUTATION_CHANCE", defaultWeightMutationChance);
+		defaultProps.setProperty("NODE_MUTATION_CHANCE", defaultNodeMutationChance);
+		defaultProps.setProperty("LINK_MUTATION_CHANCE", defaultLinkMutationChance);
+		defaultProps.setProperty("DISABLE_MUTATION_CHANCE", defaultDisableMutationChance);
+		defaultProps.setProperty("C1", defaultC1);
+		defaultProps.setProperty("C2", defaultC2);
+		defaultProps.setProperty("C3", defaultC3);
+		defaultProps.setProperty("COMPATABILITY_THRESHOLD", defaultCompatabilityThreshold);
+		defaultProps.setProperty("INITIAL_POPULATION_SIZE", defaultInitialPopulationSize);
+		defaultProps.setProperty("GENERATIONS", defaultGenerations);
+		defaultProps.setProperty("CROSSOVER_PROPORTION", defaultCrossoverProportion);
+		defaultProps.setProperty("DEPTH", defaultDepth);
+		defaultProps.setProperty("STYLE_PATH", defaultStylePath);
+		defaultProps.setProperty("RENDER_STYLE", defaultRenderStyle);
+
+		Properties properties = new Properties(defaultProps);
+
+		//create properties object from the supplied file
+		
+		FileInputStream in;
+		try {
+			in = new FileInputStream(propertiesFile);
+			properties.load(in);
+			in.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Unable to read the properties file. This may mean that the filepath is invalid.");
+		}
+
+		//load properties from either the supplied file or the defaults and cast them to the correct type
+		try {
+			this.weightMutationChance = Double.parseDouble(properties.getProperty("WEIGHT_MUTATION_CHANCE"));
+			this.nodeMutationChance = Double.parseDouble(properties.getProperty("NODE_MUTATION_CHANCE"));
+			this.linkMutationChance = Double.parseDouble(properties.getProperty("LINK_MUTATION_CHANCE"));
+			this.disableMutationChance = Double.parseDouble(properties.getProperty("DISABLE_MUTATION_CHANCE"));
+			this.c1 = Double.parseDouble(properties.getProperty("C1"));
+			this.c2 = Double.parseDouble(properties.getProperty("C2"));
+			this.c3 = Double.parseDouble(properties.getProperty("C3"));
+			this.compatabilityThreshold = Double.parseDouble(properties.getProperty("COMPATABILITY_THRESHOLD"));
+			this.initialPopulationSize = Integer.parseInt(properties.getProperty("INITIAL_POPULATION_SIZE"));
+			this.generations = Integer.parseInt(properties.getProperty("GENERATIONS"));
+			this.crossoverProportion = Double.parseDouble(properties.getProperty("CROSSOVER_PROPORTION"));
+			this.depth = Integer.parseInt(properties.getProperty("DEPTH"));
+			this.stylePath = properties.getProperty("STYLE_PATH");
+			this.renderStyle = properties.getProperty("RENDER_STYLE");
+		}
+		catch(NumberFormatException e) {
+			throw new RuntimeException("Invalid values found in configuration file");
+		}
+	}
+	
+	/**
+	 * Creates a new Configuration with all parameters set to their default values.
+	 */
+	public Configuration() {
+		this.weightMutationChance = Double.parseDouble(Configuration.defaultWeightMutationChance);
+		this.nodeMutationChance = Double.parseDouble(Configuration.defaultNodeMutationChance);
+		this.linkMutationChance = Double.parseDouble(Configuration.defaultLinkMutationChance);
+		this.disableMutationChance = Double.parseDouble(Configuration.defaultDisableMutationChance);
+		this.c1 = Double.parseDouble(Configuration.defaultC1);
+		this.c2 = Double.parseDouble(Configuration.defaultC2);
+		this.c3 = Double.parseDouble(Configuration.defaultC3);
+		this.compatabilityThreshold = Double.parseDouble(Configuration.defaultCompatabilityThreshold);
+		this.initialPopulationSize = Integer.parseInt(Configuration.defaultInitialPopulationSize);
+		this.generations = Integer.parseInt(Configuration.defaultGenerations);
+		this.crossoverProportion = Double.parseDouble(Configuration.defaultCrossoverProportion);
+		this.depth = Integer.parseInt(Configuration.defaultDepth);
+		this.stylePath = Configuration.defaultStylePath;
+		this.renderStyle = Configuration.defaultRenderStyle;
+	}
+}
