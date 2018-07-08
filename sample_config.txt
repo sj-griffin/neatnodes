@@ -6,11 +6,11 @@ DISABLE_MUTATION_CHANCE=0.75
 
 # coefficients used to adjust the importance of the three factors used to calculate compatability distance
 # importance of E
-C1=1.0
+E_WEIGHT=1.0
 # importance of D
-C2=1.0
+D_WEIGHT=1.0
 # importance of W bar
-C3=0.4
+W_WEIGHT=0.4
 
 # called dt in the paper. default 3.0
 COMPATABILITY_THRESHOLD=1.0

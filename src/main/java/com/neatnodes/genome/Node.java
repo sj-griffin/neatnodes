@@ -119,7 +119,7 @@ public class Node {
 	void setValue(double value){
 		if(type != INPUT && type != BIAS){
 			//fail if something is trying to set a non-input/bias value
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot set the value for a non input/bias node.");
 		}
 		this.value = value;
 	}

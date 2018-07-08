@@ -20,7 +20,7 @@ public class Simulation {
 	/**
 	 * Runs the function implemented by the supplied Genome. This method assumes that the Genome has all 
 	 * its inputs in consecutive node positions starting from node 1.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to run.
 	 * @param inputs
 	 * 		An array of input values to pass to the Genome when running it. the number of inputs must 
@@ -31,9 +31,9 @@ public class Simulation {
 	 * 		An array of output values produced by running the Genome. The number of outputs is determined by 
 	 * 		the number of output nodes in the Genome.
 	 */
-	public static Double[] runFunction(Genome g, Double[] inputs, int depth) {
-		if(inputs.length != g.getNumberOfInputs()) {
-			throw new RuntimeException();
+	public static Double[] runFunction(Genome genome, Double[] inputs, int depth) {
+		if(inputs.length != genome.getNumberOfInputs()) {
+			throw new RuntimeException("Invalid number of inputs for the Genome");
 		}
 		
 		//set the inputs
@@ -41,16 +41,16 @@ public class Simulation {
 		for(int i = 0; i < inputs.length; i++) {
 			inputMap.put(i + 1, inputs[i]);
 		}
-		g.writeInputs(inputMap);
+		genome.writeInputs(inputMap);
 		
 		//run the genome for a preset number of cycles
 		for(int i = 0; i < depth; i++){
-			g.run();
+			genome.run();
 		}
 		
 		//read the outputs
-		HashMap<Integer, Double> outputMap = g.readOutputs();
-		g.reset();
+		HashMap<Integer, Double> outputMap = genome.readOutputs();
+		genome.reset();
 		
 		Double[] outputs = new Double[outputMap.size()];
 		int index = 0;
@@ -64,9 +64,9 @@ public class Simulation {
 	/**
 	 * Tests the fitness of a Genome for computing a function represented by the supplied DataSet. The entries in the 
 	 * DataSet must align with what is expected by the Genome, otherwise an exception will be thrown.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to test.
-	 * @param d
+	 * @param dataset
 	 * 		The DataSet to test against.
 	 * @param depth
 	 * 		The number of iterations to run the Genome for before reading off a result each time.
@@ -74,29 +74,29 @@ public class Simulation {
 	 * 		A fitness score out of 100, with 100 being a Genome that perfectly reproduces the DataSet, and 0 being a 
 	 * 		Genome that gets every result completely wrong.
 	 */
-	public static double testFitness(Genome g, DataSet d, int depth) {
+	public static double testFitness(Genome genome, DataSet dataset, int depth) {
 		//validate that the DataSet fits the Genome
-		if(d.getInputNumber() != g.getNumberOfInputs()) {
-			throw new RuntimeException();
+		if(dataset.getInputNumber() != genome.getNumberOfInputs()) {
+			throw new RuntimeException("Number of inputs in the dataset does not match the Genome");
 		}
 		
-		if(d.getOutputNumber() != g.getNumberOfOutputs()) {
-			throw new RuntimeException();
+		if(dataset.getOutputNumber() != genome.getNumberOfOutputs()) {
+			throw new RuntimeException("Number of outputs in the dataset does not match the Genome");
 		}
 		
 		double totalDifference = 0.0; //tracks the accumulated difference between the expected set of outputs and the actual output		
 		double maxPossibleDifference = 0.0; //the total possible difference for when all results are completely wrong
 		
 		//test the Genome against each entry in the DataSet
-		for(int i = 0; i < d.getNumberOfEntries(); i++) {
-			Double[] inputs = d.getInputsForRow(i);
-			Double[] result = runFunction(g, inputs, depth);
-			Double[] expectedOutputs = d.getOutputsForRow(i);
+		for(int i = 0; i < dataset.getNumberOfEntries(); i++) {
+			Double[] inputs = dataset.getInputsForRow(i);
+			Double[] result = runFunction(genome, inputs, depth);
+			Double[] expectedOutputs = dataset.getOutputsForRow(i);
 			Double weight = 1.0;
-			if(d.isWeighted()) {
-				weight = d.getWeightForRow(i);
+			if(dataset.isWeighted()) {
+				weight = dataset.getWeightForRow(i);
 			}
-			maxPossibleDifference += (weight * d.getOutputNumber());
+			maxPossibleDifference += (weight * dataset.getOutputNumber());
 			
 			//for each result, we find the difference between it and the expected output in that position, then add it to the total difference
 			//entries have an impact on the total difference proportional to their weight
@@ -115,14 +115,11 @@ public class Simulation {
 		return (rawFitnessScore / maxPossibleFitness) * 100.00;
 	}
 	
-	//dataSetPath is the path to a CSV file containing the dataset
-	//configPath is the path to a properties file
-	
 	/**
 	 * Runs the complete NEAT algorithm to produce a Genome that implements the supplied DataSet as well as possible.
 	 * @param dataset
 	 * 		The DataSet to run the algorithm on.
-	 * @param c
+	 * @param config
 	 * 		A Configuration object that provides the parameters to run the algorithm with.
 	 * @param visualize
 	 * 		If true, the simulation will run in visualize mode, where it is artificially slowed down and rendered 
@@ -131,26 +128,26 @@ public class Simulation {
 	 * @return
 	 * 		The resulting Genome that best implements the DataSet.
 	 */
-	public static Genome runSimulation(DataSet dataset, Configuration c, boolean visualize) {
+	public static Genome runSimulation(DataSet dataset, Configuration config, boolean visualize) {
 
 		InnovationManager iManager = new InnovationManager();
 		ArrayList<Species> allSpecies = new ArrayList<Species>();
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");
 		
 		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
-		final GenomeRenderer renderer = new GenomeRenderer(c.stylePath, c.renderStyle, commandQueue, true);
+		final GenomeRenderer renderer = new GenomeRenderer(config.stylePath, config.renderStyle, commandQueue, true);
 
 		if(visualize) {
 			new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
 		}
 		
 		//setup an initial uniform population in an initial species
-		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), c.initialPopulationSize, iManager, c));
+		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), config.initialPopulationSize, iManager, config));
 		
 		Genome globalChampion = null;
 		
 		//run the simulation for the configured number of generations
-		for(int generation = 0; generation < c.generations; generation ++){
+		for(int generation = 0; generation < config.generations; generation ++){
 			System.out.println("Starting generation " + generation);
 						
 			double globalFitnessSum = 0.0; //the sum of all average fitnesses of all species
@@ -160,7 +157,7 @@ public class Simulation {
 				ArrayList<Genome> currentGenomes = allSpecies.get(i).getGenomes();
 				for(int j = 0; j < currentGenomes.size(); j++){
 					Genome current = currentGenomes.get(j);
-					current.setFitness(testFitness(current, dataset, c.depth));
+					current.setFitness(testFitness(current, dataset, config.depth));
 				}
 				allSpecies.get(i).calculateAverageFitness(); //calculate the average fitness of the species
 				globalFitnessSum += allSpecies.get(i).getAverageFitness(); //add the average fitness of the species to the sum of all average fitnesses
@@ -175,8 +172,8 @@ public class Simulation {
 				//decide what proportion of the next generation each species will produce
 				//a species which contributes more to the globalFitnessSum gets to produce more of the offspring
 				double offspringPercentage = currentSpecies.getAverageFitness() / globalFitnessSum;
-				int numberOfOffspring = (int)Math.floor(offspringPercentage * c.initialPopulationSize);
-				int numberOfCrossovers = (int)Math.floor(numberOfOffspring * c.crossoverProportion);
+				int numberOfOffspring = (int)Math.floor(offspringPercentage * config.initialPopulationSize);
+				int numberOfCrossovers = (int)Math.floor(numberOfOffspring * config.crossoverProportion);
 				
 				//cull the weakest genomes from the species before breeding and retrieve the champion of the species
 				Genome champion = currentSpecies.cull();
@@ -224,7 +221,7 @@ public class Simulation {
 				int generationsWithoutImprovement = currentSpecies.getGenerationsWithoutImprovement() + 1;
 				System.out.println("Generation: " + generation + ", Species: " + i + ", Max fitness: " + doubleFormat.format(maxFitness) + ", Stagnant generations: " + generationsWithoutImprovement);
 				allSpecies.remove(i);
-				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement, c));
+				allSpecies.add(i, new Species(representative, maxFitness, generationsWithoutImprovement, config));
 			}
 			System.out.println("Created species for the next generation");
 
@@ -242,7 +239,7 @@ public class Simulation {
 				
 				//if the genome has not been accepted into any species, create a new one for it
 				if(!added){
-					Species newSpecies = new Species(currentGenome, 0.0, 0, c);
+					Species newSpecies = new Species(currentGenome, 0.0, 0, config);
 					newSpecies.addGenome(currentGenome);
 					allSpecies.add(newSpecies);
 				}
@@ -300,7 +297,7 @@ public class Simulation {
 				System.out.print(doubleFormat.format(inputs[j]) + ", ");
 			}
 			System.out.print(doubleFormat.format(inputs[inputs.length - 1]) + "-> ");
-			Double[] outputs = runFunction(globalChampion, inputs, c.depth);
+			Double[] outputs = runFunction(globalChampion, inputs, config.depth);
 			for(int j = 0; j < outputs.length - 1; j++) {
 				System.out.print(doubleFormat.format(outputs[j]) + ", ");
 			}
@@ -312,16 +309,16 @@ public class Simulation {
 	
 	/**
 	 * Displays a single Genome in a window.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to render.
-	 * @param c
+	 * @param config
 	 * 		A Configuration containing the parameters to use for the display.
 	 */
-	public static void viewGenome(Genome g, Configuration c) {
+	public static void viewGenome(Genome genome, Configuration config) {
 		CommandQueue commandQueue = new CommandQueue(); //stores the commands that will be executed by the GenomeRenderer
-		final GenomeRenderer renderer = new GenomeRenderer(c.stylePath, c.renderStyle, commandQueue, false);
+		final GenomeRenderer renderer = new GenomeRenderer(config.stylePath, config.renderStyle, commandQueue, false);
 		new Thread(renderer).start(); //start the GenomeRenderer running in it's own thread
-		commandQueue.push(() -> renderer.renderGenome(g, null, null, "large"));
+		commandQueue.push(() -> renderer.renderGenome(genome, null, null, "large"));
 	}
 
 }

@@ -21,7 +21,7 @@ import com.neatnodes.genome.Node;
 public class JSONTools {
 	/**
 	 * Encode a Genome object as a JSON file. 
-	 * @param g
+	 * @param genome
 	 * 		The Genome to encode.
 	 * @param filePath
 	 * 		Path to a JSON file to create.
@@ -29,7 +29,7 @@ public class JSONTools {
 	 * 		Value for a comment field in the output file that can be used to provide meta information about 
 	 * 		the Genome.
 	 */
-	public static void writeGenomeToFile(Genome g, String filePath, String comment){	
+	public static void writeGenomeToFile(Genome genome, String filePath, String comment){	
 		File f = new File(filePath);
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
@@ -43,7 +43,7 @@ public class JSONTools {
 			bw.newLine();
 			boolean firstEntry = true;
 			
-			for (Map.Entry<Integer, Node> node : g.getNodeGenes().entrySet()){
+			for (Map.Entry<Integer, Node> node : genome.getNodeGenes().entrySet()){
 				Node n = node.getValue();
 				if(!firstEntry){
 					bw.write(",");
@@ -69,7 +69,7 @@ public class JSONTools {
 			bw.newLine();
 			
 			firstEntry = true;
-			for (Map.Entry<Integer, Connection> connection : g.getConnectionGenes().entrySet()){
+			for (Map.Entry<Integer, Connection> connection : genome.getConnectionGenes().entrySet()){
 				Connection c = connection.getValue();
 				if(!c.isEnabled()){
 					continue; //skip this iteration if the connection is disabled

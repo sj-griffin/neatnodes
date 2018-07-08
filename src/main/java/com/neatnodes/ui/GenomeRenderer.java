@@ -289,18 +289,18 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	 * For use in generational simulations. Adds a Genome to the current generation. The Genome will not be rendered 
 	 * until the next time newGeneration() is called. This allows us to batch Genomes into generations so that we 
 	 * can optimise their positioning.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to add.
 	 */
-	public void addGenomeToCurrentGeneration(Genome g) {
-		this.currentGeneration.add(g);
+	public void addGenomeToCurrentGeneration(Genome genome) {
+		this.currentGeneration.add(genome);
 	}
 	
 
 	/**
 	 * Takes a Genome and renders it on the graph with its bias node locked to the graph coordinates specified. If null 
 	 * is given as a value for either coordinate, that coordinate will be selected automatically.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to render.
 	 * @param xPos
 	 * 		The x position in graph coordinates.
@@ -310,9 +310,9 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	 * 		Determines the initial size class the genome will use, which will determine its initial style. Valid values 
 	 * 		are "small", "medium", or "large".
 	 */
-	public void renderGenome(Genome g, Double xPos, Double yPos, String styleSize) {
-		HashMap<Integer, Connection> connections = g.getConnectionGenes();
-		HashMap<Integer, Node> nodes = g.getNodeGenes();
+	public void renderGenome(Genome genome, Double xPos, Double yPos, String styleSize) {
+		HashMap<Integer, Connection> connections = genome.getConnectionGenes();
+		HashMap<Integer, Node> nodes = genome.getNodeGenes();
 		
 		for(int key : nodes.keySet()) {
 			Node currentNode = nodes.get(key);
@@ -334,7 +334,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 				n.addAttribute("ui.class", "hidden_node");
 				break;
 			default:
-				throw new RuntimeException();
+				throw new RuntimeException("Invalid node type. This indicates a bug.");
 			}
 			n.addAttribute("ui.label", currentNode.getLabel());
 			n.setAttribute("ui.class", n.getAttribute("ui.class") + ", " + styleSize);

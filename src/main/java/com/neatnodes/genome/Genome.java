@@ -68,24 +68,24 @@ public class Genome {
 
 	/**
 	 * Get the Node with a given key in the Genome.
-	 * @param n
+	 * @param key
 	 * 		The key (label) of the Node.
 	 * @return
 	 * 		The Node.
 	 */
-	public Node getNode(int n){
-		return nodeGenes.get(n);
+	public Node getNode(int key){
+		return nodeGenes.get(key);
 	}
 	
 	/**
 	 * Get the Connection with a given key in the Genome. The key will be the same as the Connection's innovation number.
-	 * @param n
+	 * @param key
 	 * 		The key (label) of the Connection.
 	 * @return
 	 * 		The Connection.
 	 */
-	public Connection getConnection(int n){
-		return connectionGenes.get(n);
+	public Connection getConnection(int key){
+		return connectionGenes.get(key);
 	}
 	
 	/**
@@ -116,22 +116,22 @@ public class Genome {
 	public void addNode(int label, int type){
 		//if the Genome has already been finalised, fail
 		if(fitnessMeasured){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot add Node to Genome after fitness has been measured");
 		}
 		
 		//if the type is not valid, fail
 		if(type < 1 || type > 4){
-			throw new RuntimeException();
+			throw new RuntimeException("Invalid Node type");
 		}
 		
 		//if a gene with the specified label already exists, fail
 		if(nodeGenes.containsKey(label)){
-			throw new RuntimeException();
+			throw new RuntimeException("A Node with the label " + label + " already exists in the Genome");
 		}
 		
 		//if this node is a second bias node, fail
 		if(type == Node.BIAS && nodeGenes.containsKey(0)) {
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot add more than one bias Node to a Genome");
 		}
 		
 		nodeGenes.put(label, new Node(type, label));
@@ -162,12 +162,12 @@ public class Genome {
 	public void addConnection(int inNodeNumber, int outNodeNumber, double weight, boolean enabled, int innovationNumber){
 		//if the genome has already been finalised, fail
 		if(fitnessMeasured){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot add Connection to Genome after fitness has been measured");
 		}
 		
 		//if a gene with the specified innovationNumber already exists, fail
 		if(connectionGenes.containsKey(innovationNumber)){
-			throw new RuntimeException();
+			throw new RuntimeException("A Connection with the innovation number " + innovationNumber + " already exists in the Genome");
 		}
 		
 		//the nodes being connected can be the same node as recursive connections are allowed
@@ -177,7 +177,7 @@ public class Genome {
 		Node outNode = nodeGenes.get(outNodeNumber);
 		
 		if(inNode == null || outNode == null){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot create a Connection between Nodes that don't exist");
 		}
 		
 		connectionGenes.put(innovationNumber, new Connection(inNode, outNode, weight, enabled, innovationNumber));
@@ -189,9 +189,9 @@ public class Genome {
 	 * 		A Configuration object that parameters for the mutation will be drawn from.
 	 */
 	public void mutate(Configuration configuration){
-		//if the genome has already been finalised, fail
+		//if the Genome has already been finalised, fail
 		if(fitnessMeasured){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot mutate Genome after fitness has been measured");
 		}
 		
 		//do nothing if there are no genes to mutate
@@ -356,7 +356,7 @@ public class Genome {
 	public void writeInputs(HashMap<Integer, Double> inputs){
 		if (inputs.size() != numberOfInputs){
 			//fail if the number of inputs is incorrect
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot write inputs. The specified number of inputs does not match the Genome.");
 		}
 		
 		for (Map.Entry<Integer, Double> input : inputs.entrySet()){
@@ -364,7 +364,7 @@ public class Genome {
 			Node node = nodeGenes.get(input.getKey());
 			//fail if the specified node doesn't exist or is not an input
 			if (node == null || (node.getType() != Node.INPUT)){
-				throw new RuntimeException();
+				throw new RuntimeException("Cannot write input to node " + input.getKey() + ". The node does not exist or is not an input node.");
 			}
 			node.setValue(input.getValue()); //set the input node
 		}
@@ -388,7 +388,7 @@ public class Genome {
 		}
 		
 		if(outputs.size() != numberOfOutputs){
-			throw new RuntimeException();
+			throw new RuntimeException("Invalid number of outputs. This indicates a bug.");
 		}
 		
 		return outputs;
@@ -449,7 +449,7 @@ public class Genome {
 	public double getFitness(){
 		//if the fitness has not been set, fail
 		if(!fitnessMeasured){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot return fitness before it has been measured.");
 		}
 		return fitness;
 	}

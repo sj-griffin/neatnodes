@@ -41,8 +41,8 @@ class StaticFunctions {
 		int g2GenesSize = g2Genes.size();
 		
 		if (g1GenesSize == 0 || g2GenesSize == 0){
-			//the algorithm will not work for empty genomes
-			throw new RuntimeException();
+			//the algorithm will not work for empty Genomes
+			throw new RuntimeException("Cannot calculate compatibility distance between empty Genomes");
 		}
 		
 		int g1GenesCounted = 0;
@@ -131,9 +131,9 @@ class StaticFunctions {
 		}
 		
 		//perform the calculation
-		double term1 = (configuration.c1 * numberOfExcessGenes)/maxGenes;
-		double term2 = (configuration.c2 * numberOfDisjointGenes)/maxGenes;
-		double term3 = configuration.c3 * averageWeightDifference;
+		double term1 = (configuration.EWeight * numberOfExcessGenes)/maxGenes;
+		double term2 = (configuration.DWeight * numberOfDisjointGenes)/maxGenes;
+		double term3 = configuration.WWeight * averageWeightDifference;
 		return term1 + term2 + term3;
 	}
 	
@@ -155,7 +155,7 @@ class StaticFunctions {
 		
 		//fail if the fitness of either parent has not been set
 		if(!father.isFitnessMeasured() || !mother.isFitnessMeasured()){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot breed Genomes before their fitness has been set");
 		}
 		
 		//calculate who is the fitter parent
@@ -254,27 +254,27 @@ class StaticFunctions {
 	
 	/**
 	 * Create a copy of a Connection and the Nodes it depends on and add them to another Genome.
-	 * @param c
+	 * @param config
 	 * 		The Connection to add.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to add the Connection to.
 	 * @param enabled
 	 * 		If true, the Connection will be enabled in the new Genome. If false, it will be disabled.
 	 */
-	static void duplicateConnection(Connection c, Genome g, boolean enabled){
-		Node nodeToAdd1 = c.getInNode();
-		Node nodeToAdd2 = c.getOutNode();
+	static void duplicateConnection(Connection config, Genome genome, boolean enabled){
+		Node nodeToAdd1 = config.getInNode();
+		Node nodeToAdd2 = config.getOutNode();
 		
 		//add the required nodes to the offspring if they don't already exist.
-		if(g.getNode(nodeToAdd1.getLabel()) == null){
-			g.addNode(nodeToAdd1.getLabel(), nodeToAdd1.getType());
+		if(genome.getNode(nodeToAdd1.getLabel()) == null){
+			genome.addNode(nodeToAdd1.getLabel(), nodeToAdd1.getType());
 		}
-		if(g.getNode(nodeToAdd2.getLabel()) == null){
-			g.addNode(nodeToAdd2.getLabel(), nodeToAdd2.getType());
+		if(genome.getNode(nodeToAdd2.getLabel()) == null){
+			genome.addNode(nodeToAdd2.getLabel(), nodeToAdd2.getType());
 		}
 		
 		//add the required connection to the offspring.
-		g.addConnection(nodeToAdd1.getLabel(), nodeToAdd2.getLabel(), c.getWeight(), enabled, c.getInnovationNumber());
+		genome.addConnection(nodeToAdd1.getLabel(), nodeToAdd2.getLabel(), config.getWeight(), enabled, config.getInnovationNumber());
 	}
 	
 	/**
@@ -318,7 +318,7 @@ class StaticFunctions {
 		//add the initial population to the first species
 		for(int i = 0; i < populationSize; i++){
 			if(result.addGenome(baseGenome.cloneGenome()) == false){
-				throw new RuntimeException();
+				throw new RuntimeException("Cannot add Genome to Species. Genome does not fall within the required compatibility distance. This indicates a bug.");
 			}
 		}
 		return result;

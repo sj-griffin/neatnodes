@@ -15,9 +15,9 @@ import java.util.Properties;
  * NODE_MUTATION_CHANCE=0.03
  * LINK_MUTATION_CHANCE=0.05
  * DISABLE_MUTATION_CHANCE=0.75
- * C1=1.0
- * C2=1.0
- * C3=0.4
+ * E_WEIGHT=1.0
+ * D_WEIGHT=1.0
+ * W_WEIGHT=0.4
  * COMPATABILITY_THRESHOLD=1.0
  * INITIAL_POPULATION_SIZE=150
  * GENERATIONS=1000
@@ -34,9 +34,9 @@ public class Configuration {
 	static final String defaultNodeMutationChance = "0.03";
 	static final String defaultLinkMutationChance = "0.05";
 	static final String defaultDisableMutationChance = "0.75";
-	static final String defaultC1 = "1.0";
-	static final String defaultC2 = "1.0";
-	static final String defaultC3 = "0.4";
+	static final String defaultEWeight = "1.0";
+	static final String defaultDWeight = "1.0";
+	static final String defaultWWeight = "0.4";
 	static final String defaultCompatabilityThreshold = "1.0";
 	static final String defaultInitialPopulationSize = "150";
 	static final String defaultGenerations = "1000";
@@ -65,17 +65,17 @@ public class Configuration {
 	/**
 	 * A coefficient used to adjust the importance of the E term when calculating compatibility distance.
 	 */
-	public final double c1;
+	public final double EWeight;
 	
 	/**
 	 * A coefficient used to adjust the importance of the D term when calculating compatibility distance.
 	 */
-	public final double c2;
+	public final double DWeight;
 	
 	/**
 	 * A coefficient used to adjust the importance of the "W bar" term when calculating compatibility distance.
 	 */
-	public final double c3;
+	public final double WWeight;
 	
 	/**
 	 * The compatibility threshold used to determine whether a Genome qualifies as a member of a Species.
@@ -128,9 +128,9 @@ public class Configuration {
 		defaultProps.setProperty("NODE_MUTATION_CHANCE", defaultNodeMutationChance);
 		defaultProps.setProperty("LINK_MUTATION_CHANCE", defaultLinkMutationChance);
 		defaultProps.setProperty("DISABLE_MUTATION_CHANCE", defaultDisableMutationChance);
-		defaultProps.setProperty("C1", defaultC1);
-		defaultProps.setProperty("C2", defaultC2);
-		defaultProps.setProperty("C3", defaultC3);
+		defaultProps.setProperty("E_WEIGHT", defaultEWeight);
+		defaultProps.setProperty("D_WEIGHT", defaultDWeight);
+		defaultProps.setProperty("W_WEIGHT", defaultWWeight);
 		defaultProps.setProperty("COMPATABILITY_THRESHOLD", defaultCompatabilityThreshold);
 		defaultProps.setProperty("INITIAL_POPULATION_SIZE", defaultInitialPopulationSize);
 		defaultProps.setProperty("GENERATIONS", defaultGenerations);
@@ -158,9 +158,9 @@ public class Configuration {
 			this.nodeMutationChance = Double.parseDouble(properties.getProperty("NODE_MUTATION_CHANCE"));
 			this.linkMutationChance = Double.parseDouble(properties.getProperty("LINK_MUTATION_CHANCE"));
 			this.disableMutationChance = Double.parseDouble(properties.getProperty("DISABLE_MUTATION_CHANCE"));
-			this.c1 = Double.parseDouble(properties.getProperty("C1"));
-			this.c2 = Double.parseDouble(properties.getProperty("C2"));
-			this.c3 = Double.parseDouble(properties.getProperty("C3"));
+			this.EWeight = Double.parseDouble(properties.getProperty("E_WEIGHT"));
+			this.DWeight = Double.parseDouble(properties.getProperty("D_WEIGHT"));
+			this.WWeight = Double.parseDouble(properties.getProperty("W_WEIGHT"));
 			this.compatabilityThreshold = Double.parseDouble(properties.getProperty("COMPATABILITY_THRESHOLD"));
 			this.initialPopulationSize = Integer.parseInt(properties.getProperty("INITIAL_POPULATION_SIZE"));
 			this.generations = Integer.parseInt(properties.getProperty("GENERATIONS"));
@@ -182,9 +182,9 @@ public class Configuration {
 		this.nodeMutationChance = Double.parseDouble(Configuration.defaultNodeMutationChance);
 		this.linkMutationChance = Double.parseDouble(Configuration.defaultLinkMutationChance);
 		this.disableMutationChance = Double.parseDouble(Configuration.defaultDisableMutationChance);
-		this.c1 = Double.parseDouble(Configuration.defaultC1);
-		this.c2 = Double.parseDouble(Configuration.defaultC2);
-		this.c3 = Double.parseDouble(Configuration.defaultC3);
+		this.EWeight = Double.parseDouble(Configuration.defaultEWeight);
+		this.DWeight = Double.parseDouble(Configuration.defaultDWeight);
+		this.WWeight = Double.parseDouble(Configuration.defaultWWeight);
 		this.compatabilityThreshold = Double.parseDouble(Configuration.defaultCompatabilityThreshold);
 		this.initialPopulationSize = Integer.parseInt(Configuration.defaultInitialPopulationSize);
 		this.generations = Integer.parseInt(Configuration.defaultGenerations);

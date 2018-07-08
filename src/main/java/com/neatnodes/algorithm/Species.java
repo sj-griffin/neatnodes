@@ -53,20 +53,20 @@ class Species {
 	 * Attempts to add a Genome to the Species. The Genome will only be added if it falls within the compatibility 
 	 * threshold specified by the Configuration object. This method will throw an exception if the Species has already 
 	 * been finalised.
-	 * @param g
+	 * @param genome
 	 * 		The Genome to add.
 	 * @return
 	 * 		True if successful, or false if the Genome did not meet the criteria.
 	 */
-	boolean addGenome(Genome g){
+	boolean addGenome(Genome genome){
 		//fail if the Species is already finalised
 		if(finalised){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot add Genome to Species after the Species has been finalised");
 		}
 		
-		double compatabilityDistance = StaticFunctions.calculateCompatabilityDistance(g, representativeGenome, this.configuration);
+		double compatabilityDistance = StaticFunctions.calculateCompatabilityDistance(genome, representativeGenome, this.configuration);
 		if(compatabilityDistance <= this.configuration.compatabilityThreshold){
-			genomes.add(g);
+			genomes.add(genome);
 			return true;
 		}
 		return false;
@@ -109,7 +109,7 @@ class Species {
 	double getAverageFitness() {
 		//fail if the average fitness hasn't been calculated yet
 		if(!finalised){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot get average fitness before it has been calculated");
 		}
 		return averageFitness;
 	}
@@ -155,7 +155,7 @@ class Species {
 	Genome produceOffspring(boolean crossover, InnovationManager iManager){
 		//fail if the species has not been finalised yet
 		if(!finalised){
-			throw new RuntimeException();
+			throw new RuntimeException("Cannot produce offspring before the Species has been finalised");
 		}
 		
 		//pick the genomes to breed

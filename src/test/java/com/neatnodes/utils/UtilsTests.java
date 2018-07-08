@@ -713,9 +713,9 @@ public class UtilsTests {
 		assertEquals(0.03, configuration.nodeMutationChance);
 		assertEquals(0.05, configuration.linkMutationChance);
 		assertEquals(0.75, configuration.disableMutationChance);
-		assertEquals(1.0, configuration.c1);
-		assertEquals(1.0, configuration.c2);
-		assertEquals(0.4, configuration.c3);
+		assertEquals(1.0, configuration.EWeight);
+		assertEquals(1.0, configuration.DWeight);
+		assertEquals(0.4, configuration.WWeight);
 		assertEquals(1.0, configuration.compatabilityThreshold);
 		assertEquals(150, configuration.initialPopulationSize);
 		assertEquals(1000, configuration.generations);
@@ -741,9 +741,9 @@ public class UtilsTests {
 		assertEquals(0.03, configuration.nodeMutationChance);
 		assertEquals(0.05, configuration.linkMutationChance);
 		assertEquals(0.75, configuration.disableMutationChance);
-		assertEquals(1.0, configuration.c1);
-		assertEquals(1.0, configuration.c2);
-		assertEquals(0.4, configuration.c3);
+		assertEquals(1.0, configuration.EWeight);
+		assertEquals(1.0, configuration.DWeight);
+		assertEquals(0.4, configuration.WWeight);
 		assertEquals(1.0, configuration.compatabilityThreshold);
 		assertEquals(150, configuration.initialPopulationSize);
 		assertEquals(1000, configuration.generations);
@@ -761,9 +761,9 @@ public class UtilsTests {
 					"NODE_MUTATION_CHANCE=0.02\r\n" + 
 					"LINK_MUTATION_CHANCE=0.07\r\n" + 
 					"DISABLE_MUTATION_CHANCE=0.15\r\n" + 
-					"C1=2.0\r\n" + 
-					"C2=3.5\r\n" + 
-					"C3=0.8\r\n" + 
+					"E_WEIGHT=2.0\r\n" + 
+					"D_WEIGHT=3.5\r\n" + 
+					"W_WEIGHT=0.8\r\n" + 
 					"# test comment\r\n" + 
 					"COMPATABILITY_THRESHOLD=2.25\r\n" + 
 					"INITIAL_POPULATION_SIZE=33\r\n" + 
@@ -786,9 +786,9 @@ public class UtilsTests {
 		assertEquals(0.02, configuration.nodeMutationChance);
 		assertEquals(0.07, configuration.linkMutationChance);
 		assertEquals(0.15, configuration.disableMutationChance);
-		assertEquals(2.0, configuration.c1);
-		assertEquals(3.5, configuration.c2);
-		assertEquals(0.8, configuration.c3);
+		assertEquals(2.0, configuration.EWeight);
+		assertEquals(3.5, configuration.DWeight);
+		assertEquals(0.8, configuration.WWeight);
 		assertEquals(2.25, configuration.compatabilityThreshold);
 		assertEquals(33, configuration.initialPopulationSize);
 		assertEquals(850, configuration.generations);
