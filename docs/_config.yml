@@ -42,3 +42,5 @@ markdown: kramdown
 #   - vendor/ruby/
 
 #github: [metadata]
+
+theme: jekyll-theme-slate
