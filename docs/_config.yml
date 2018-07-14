@@ -43,4 +43,4 @@ markdown: kramdown
 
 #github: [metadata]
 
-theme: jekyll-theme-slate
+theme: jekyll-theme-cayman
