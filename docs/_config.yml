@@ -17,17 +17,17 @@ title: NeatNodes
 email: samgriffin108@gmail.com
 description: >- # this means to ignore newlines until "baseurl:"
   A Java library for visualising machine learning.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+#baseurl: "" # the subpath of your site, e.g. /blog
+#url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
-repository: sj-griffin/neatnodes
+#repository: sj-griffin/neatnodes
 show_downloads: true
 
 # Build settings
 markdown: kramdown
 #theme: jekyll-theme-cayman
-plugins:
-  - jekyll-feed
+#plugins:
+#  - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
