@@ -4,11 +4,11 @@
 
   <groupId>com.neatnodes</groupId>
   <artifactId>neatnodes</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.1</version>
   <packaging>jar</packaging>
 
   <name>neatnodes</name>
-  <url>http://maven.apache.org</url>
+  <url>https://sj-griffin.github.io/neatnodes/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -65,4 +65,59 @@
 	  <version>2.10.6</version>
 	</dependency>
   </dependencies>
+  
+<build>
+<resources>
+	<resource>
+		<directory>styles</directory>
+	</resource>
+</resources>
+  <plugins>
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-compiler-plugin</artifactId>
+		<configuration>
+			<excludes>
+				<exclude>**/com/neatnodes/examples/*</exclude>
+			</excludes>
+			<source>1.8</source>
+			<target>1.8</target>
+		</configuration>
+	</plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-dependency-plugin</artifactId>
+	    <executions>
+	        <execution>
+	            <id>copy-dependencies</id>
+	            <phase>prepare-package</phase>
+	            <goals>
+	                <goal>copy-dependencies</goal>
+	            </goals>
+	            <configuration>
+	                <outputDirectory>${project.build.directory}/lib</outputDirectory>
+	                <overWriteReleases>false</overWriteReleases>
+	                <overWriteSnapshots>false</overWriteSnapshots>
+	                <overWriteIfNewer>true</overWriteIfNewer>
+	                <includeScope>runtime</includeScope>
+	            </configuration>
+	        </execution>
+	    </executions>
+	</plugin>
+	<plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-jar-plugin</artifactId>
+	    <configuration>
+	        <archive>
+	            <manifest>
+	                <addClasspath>true</addClasspath>
+	                <classpathPrefix>lib/</classpathPrefix>
+	            </manifest>
+	        </archive>
+	    </configuration>
+	</plugin>
+  </plugins>
+</build>
+
+
 </project>

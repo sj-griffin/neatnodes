@@ -1,5 +1,6 @@
 package com.neatnodes.utils;
 
+import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;

@@ -1,7 +1,9 @@
 package com.neatnodes.utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 //
@@ -23,7 +25,7 @@ import java.util.Properties;
  * GENERATIONS=1000
  * CROSSOVER_PROPORTION=0.75
  * DEPTH=3
- * STYLE_PATH=./styles
+ * STYLE_PATH={jar location}/styles
  * RENDER_STYLE=normal
  * </pre>
  * 
@@ -42,7 +44,6 @@ public class Configuration {
 	static final String defaultGenerations = "1000";
 	static final String defaultCrossoverProportion = "0.75";
 	static final String defaultDepth = "3";
-	static final String defaultStylePath = "./styles";
 	static final String defaultRenderStyle = "normal";
 	
 	/**
@@ -105,7 +106,7 @@ public class Configuration {
 	public final int depth;
 	
 	/**
-	 * The path that the GenomeRenderer will look for style sheets in.
+	 * The path that the GenomeRenderer will look for style sheets in. Must be a full path, not a relative path.
 	 */
 	public final String stylePath;
 	
@@ -136,9 +137,19 @@ public class Configuration {
 		defaultProps.setProperty("GENERATIONS", defaultGenerations);
 		defaultProps.setProperty("CROSSOVER_PROPORTION", defaultCrossoverProportion);
 		defaultProps.setProperty("DEPTH", defaultDepth);
-		defaultProps.setProperty("STYLE_PATH", defaultStylePath);
+		
+		//set the default style path dynamically depending on the location of the containing jar file
+		String sPath;
+		try {
+			sPath =  new File(Configuration.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/styles";
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error determining default style path");
+		}
+		defaultProps.setProperty("STYLE_PATH", sPath);
+		
 		defaultProps.setProperty("RENDER_STYLE", defaultRenderStyle);
-
+		
 		Properties properties = new Properties(defaultProps);
 
 		//create properties object from the supplied file
@@ -190,7 +201,17 @@ public class Configuration {
 		this.generations = Integer.parseInt(Configuration.defaultGenerations);
 		this.crossoverProportion = Double.parseDouble(Configuration.defaultCrossoverProportion);
 		this.depth = Integer.parseInt(Configuration.defaultDepth);
-		this.stylePath = Configuration.defaultStylePath;
+		
+		//set the default style path dynamically depending on the location of the containing jar file
+		String sPath;
+		try {
+			sPath =  new File(Configuration.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent() + "/styles";
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Error determining default style path");
+		}
+		this.stylePath = sPath;
+				
 		this.renderStyle = Configuration.defaultRenderStyle;
 	}
 }

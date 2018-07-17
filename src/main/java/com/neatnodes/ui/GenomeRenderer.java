@@ -94,7 +94,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		if(stylePath.endsWith("/")) {
 			stylePath = stylePath.substring(0, stylePath.length() - 1);
 		}
-		graph.addAttribute("ui.stylesheet", "url('" + stylePath + "/" + style + ".css')");
+		graph.addAttribute("ui.stylesheet", "url('file://" + stylePath + "/" + style + ".css')");
 		//graph.addAttribute("ui.quality");
 		graph.addAttribute("ui.antialias");
 		

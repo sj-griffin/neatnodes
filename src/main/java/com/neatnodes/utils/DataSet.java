@@ -109,8 +109,10 @@ public class DataSet {
 		    reader.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			throw new RuntimeException("Cannot find the CSV file");
 		} catch (IOException e) {
 			e.printStackTrace();
+			throw new RuntimeException("Cannot read the CSV file");
 		}
 		finally {
 			this.inputs = inputNumber;

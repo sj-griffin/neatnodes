@@ -26,8 +26,8 @@ CROSSOVER_PROPORTION=0.75
 # controls the number of cycles to run each genome for before reading a result. It is the equivalent of the "depth" in a feed-forward network
 DEPTH=3
 
-# controls the path that the GenomeRenderer will look for stylesheets in
-STYLE_PATH=./styles
+# controls the path that the GenomeRenderer will look for stylesheets in. Must be a full path, not a relative path.
+STYLE_PATH=/styles
 
 # controls the stylesheet that will be used when rendering genomes
 RENDER_STYLE=glow
