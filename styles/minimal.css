@@ -24,7 +24,7 @@ edge {
 	fill-color: white;
 	text-color: white;
 	arrow-shape: none;
-	size: 0px;
+	size: 1px;
 }
 
 edge.large {

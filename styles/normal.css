@@ -38,7 +38,7 @@ node.hidden_node {
 edge {
 	fill-color: white;
 	text-color: white;
-	size: 0px;
+	size: 1px;
 }
 
 edge.large {

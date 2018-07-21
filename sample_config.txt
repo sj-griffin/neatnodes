@@ -27,7 +27,7 @@ CROSSOVER_PROPORTION=0.75
 DEPTH=3
 
 # controls the path that the GenomeRenderer will look for stylesheets in. Must be a full path, not a relative path.
-STYLE_PATH=/styles
+# STYLE_PATH=
 
 # controls the stylesheet that will be used when rendering genomes
 RENDER_STYLE=glow

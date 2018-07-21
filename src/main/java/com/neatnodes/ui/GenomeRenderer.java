@@ -52,6 +52,8 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	int generation; //the current generation
 	ArrayList<Genome> currentGeneration; //a list of Genomes in the current generation
 	
+	boolean panMode; //controls mouse behaviour
+	
 	protected boolean loop = true;
 	
 	Viewer viewer;
@@ -94,16 +96,25 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		if(stylePath.endsWith("/")) {
 			stylePath = stylePath.substring(0, stylePath.length() - 1);
 		}
-		graph.addAttribute("ui.stylesheet", "url('file://" + stylePath + "/" + style + ".css')");
+		graph.addAttribute("ui.stylesheet", "url('file:///" + stylePath + "/" + style + ".css')");
 		//graph.addAttribute("ui.quality");
 		graph.addAttribute("ui.antialias");
 		
 		spriteManager = new SpriteManager(this.graph);
 		
+		this.panMode = panMode;
+		this.commandQueue = commandQueue;
+	}
+	
+	
+	/**
+	 * Sets up the viewer and mouse listeners
+	 */
+	void initialSetup() {
 		this.viewer = this.graph.display();
 		this.view = viewer.getDefaultView();
 		
-		if(panMode) {
+		if(this.panMode) {
 			//remove all the default mouse listeners. This disables unwanted features like selection boxes and the ability to drag nodes and sprites
 			MouseListener[] mouseListeners = this.view.getMouseListeners();
 			for(MouseListener m : mouseListeners){
@@ -214,7 +225,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 					Point3 mousePosPostZoom = view.getCamera().transformPxToGu(rawMousePos.getX(), rawMousePos.getY());
 					Point3 delta = new Point3(mousePosPostZoom.x - mousePosPreZoom.x, mousePosPostZoom.y - mousePosPreZoom.y);
 					view.getCamera().setViewCenter(viewCentrePreZoom.x - delta.x, viewCentrePreZoom.y - delta.y, 0);				
-								
+										
 					lastZoomLevel = zoomLevel;
 				}
 			});
@@ -224,8 +235,6 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		this.fromViewer = viewer.newViewerPipe();
 		this.fromViewer.addViewerListener(this);
 		this.fromViewer.addSink(graph);
-
-		this.commandQueue = commandQueue;
 	}
 	
 	/**
@@ -254,6 +263,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 	 */
 	@Override
 	public void run() {
+		initialSetup();
 		int loopNum = 0;
 		while(loop) {
 			this.fromViewer.pump();

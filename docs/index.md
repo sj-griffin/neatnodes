@@ -1,4 +1,4 @@
 ---
 layout: default
 ---
-This is the overview.
+Coming soon. Check out the [tutorial](tutorial.html) page in the meantime.
