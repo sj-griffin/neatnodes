@@ -96,7 +96,7 @@ public class Simulation {
 			if(dataset.isWeighted()) {
 				weight = dataset.getWeightForRow(i);
 			}
-			maxPossibleDifference += (weight * dataset.getOutputNumber());
+			maxPossibleDifference += (weight * dataset.getOutputNumber() * 2); //we multiply by 2 because the sigmoid function produces results between -1 and 1. In the worst case, a given result will differ from the expected result by 2.
 			
 			//for each result, we find the difference between it and the expected output in that position, then add it to the total difference
 			//entries have an impact on the total difference proportional to their weight

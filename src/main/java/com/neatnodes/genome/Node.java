@@ -107,7 +107,7 @@ public class Node {
 	
 	
 	private double sigmoid(double x){
-		return 1/(1+Math.exp(-4.9*x)); //sigmoid function (returns results between 0 and 1)
+		return 2/(1+Math.exp(-4.9*x))-1; //sigmoid function (returns results between -1 and 1)
 	}
 	
 	
