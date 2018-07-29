@@ -369,6 +369,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		NumberFormat doubleFormat = new DecimalFormat("#0.00");
 		for(int key : connections.keySet()) {
 			Connection currentConnection = connections.get(key);
+
 			//we prefix all edge names with a number that identifies the genome it belongs to, as all edges will appear on the same graph
 			String edgeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getInnovationNumber());
 			String inNodeName = Integer.toString(this.genomesRendered) + "-" + Integer.toString(currentConnection.getInNode().getLabel());
@@ -376,6 +377,12 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 			org.graphstream.graph.Edge e = this.graph.addEdge(edgeName, inNodeName, outNodeName, true);
 			e.setAttribute("ui.class", e.getAttribute("ui.class") + ", " + styleSize);
 			e.addAttribute("ui.label", doubleFormat.format(currentConnection.getWeight()));
+			
+			if(!currentConnection.isEnabled()) {
+				//disabled edges are not visible
+				e.addAttribute("ui.style", "visibility-mode: hidden;");
+				e.addAttribute("ui.style", "text-visibility-mode: hidden;");
+			}
 		}
 		this.genomesRendered ++;
 	}
