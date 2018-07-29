@@ -93,6 +93,7 @@ public class GenomeRenderer implements ViewerListener, Runnable {
 		System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
 		this.graph = new MultiGraph("GenomeGraph");
 		
+		stylePath = stylePath.replace('\\', '/');
 		if(stylePath.endsWith("/")) {
 			stylePath = stylePath.substring(0, stylePath.length() - 1);
 		}

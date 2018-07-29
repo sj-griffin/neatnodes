@@ -106,7 +106,7 @@ public class Configuration {
 	public final int depth;
 	
 	/**
-	 * The path that the GenomeRenderer will look for style sheets in. Must be a full path, not a relative path.
+	 * The full path that the GenomeRenderer will look for style sheets in. Must not be a relative path. If you use backslashes, you must escape them (e.g. \\).
 	 */
 	public final String stylePath;
 	
