@@ -45,14 +45,14 @@ public class GenomeTests {
 		outNode.addInput(0);
 		
 		outNode.fire();
-		assertEquals(0.92, outNode.getValue(), 0.001);
+		assertEquals(0.84112, outNode.getValue(), 0.0001);
 		
 		Node hiddenNode = new Node(Node.HIDDEN, 1);
 		hiddenNode.addInput(0.5);
 		hiddenNode.addInput(0);
 		
 		hiddenNode.fire();
-		assertEquals(0.92, hiddenNode.getValue(), 0.001);
+		assertEquals(0.84112, hiddenNode.getValue(), 0.0001);
 	}
 	
 	@Test
@@ -402,15 +402,15 @@ public class GenomeTests {
 		
 		assertEquals(1.0, g.getNode(0).getValue(), 0.000000000001);
 		assertEquals(-0.55, g.getNode(1).getValue(), 0.000000000001);
-		assertEquals(0.3798935676569098, g.getNode(2).getValue(), 0.000000000001);
-		assertEquals(0.9926084586557181, g.getNode(3).getValue(), 0.000000000001);
+		assertEquals(-0.24021286468618042, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.9852169173114362, g.getNode(3).getValue(), 0.000000000001);
 
 		g.run();
 
 		assertEquals(1.0, g.getNode(0).getValue(), 0.000000000001);
 		assertEquals(-0.55, g.getNode(1).getValue(), 0.000000000001);
-		assertEquals(0.9999992486130665, g.getNode(2).getValue(), 0.000000000001);
-		assertEquals(0.9926084586557181, g.getNode(3).getValue(), 0.000000000001);
+		assertEquals(0.9999983247402691, g.getNode(2).getValue(), 0.000000000001);
+		assertEquals(0.9852169173114362, g.getNode(3).getValue(), 0.000000000001);
 	}
 	
 	@Test
