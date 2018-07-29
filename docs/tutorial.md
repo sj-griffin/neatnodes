@@ -5,7 +5,7 @@ layout: default
 
 ## Installation
 
-To get started, download the latest release here. Make sure you have an appropriate Java development environment set up. NeatNodes requires Java 8 or higher to run. Extract the downloaded package and add the provided jar file to your class path. By default, the jar searches for dependencies in the lib directory that is also provided, so you must keep the jar file and the lib directory together or add the lib directory to your class path. By default, the jar also searches for style sheets in the provided styles directory, but you can change this setting if needed. For more information, see the **[configuration](#configuration-files)** section.
+To get started, download the latest release **[here](https://github.com/sj-griffin/neatnodes/releases/download/v0.0.1/neatnodes-v0.0.1.zip)**. Make sure you have an appropriate Java development environment set up. NeatNodes requires Java 8 or higher to run. Extract the downloaded package and add the provided jar file to your class path. By default, the jar searches for dependencies in the lib directory that is also provided, so you must keep the jar file and the lib directory together or add the lib directory to your class path. By default, the jar also searches for style sheets in the provided styles directory, but you can change this setting if needed. For more information, see the **[configuration](#configuration-files)** section.
 
 If you are working with the source code directly, you can use Maven for dependency management using the provided pom.xml file.
 
