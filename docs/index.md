@@ -22,7 +22,7 @@ NEAT is based on the principles of evolution. When you give it a set of input/ou
 This section summarises the key elements of the NEAT algorithm.  It is helpful to have a basic understanding of neural networks first. If you would like further details, you can refer to the original research paper or to the source code itself.
 
 ### Genomes
-A genome is a simple neural network that can compute a specific function. It is made up of a set of nodes and a set of connections that link the nodes together and transfer data between them. Each node holds a value and can be either an input, an output, a hidden node, or a bias node.
+A genome is a simple neural network that can compute a specific function. It is made up of a set of nodes and a set of connections that link the nodes together and transfer data between them. Each node holds a value between -1 and 1 and can be either an input, an output, a hidden node, or a bias node.
 
 A connection has the following properties:
 * An in-node (the node that it will transfer data from)

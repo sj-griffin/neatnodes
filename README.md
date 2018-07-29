@@ -1,6 +1,6 @@
 # NeatNodes
 
-<https://sj-griffin.github.io/neatnodes>
+Full documentation is available at <https://sj-griffin.github.io/neatnodes>
 
 NeatNodes is a Java implementation of a machine learning algorithm called NEAT. It also includes tools for visualising the algorithm and the neural networks it produces. It is written by Sam Griffin (<samgriffin108@gmail.com>).
 

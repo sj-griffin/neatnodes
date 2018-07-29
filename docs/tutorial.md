@@ -5,7 +5,7 @@ layout: default
 
 ## Installation
 
-To get started, download the latest release here. Extract the downloaded package and add the provided jar file to your class path. By default, the jar searches for dependencies in the lib directory that is also provided, so you must keep the jar file and the lib directory together or add the lib directory to your class path. By default, the jar also searches for style sheets in the provided styles directory, but you can change this setting if needed. For more information, see the **[configuration](#configuration-files)** section.
+To get started, download the latest release here. Make sure you have an appropriate Java development environment set up. NeatNodes requires Java 8 or higher to run. Extract the downloaded package and add the provided jar file to your class path. By default, the jar searches for dependencies in the lib directory that is also provided, so you must keep the jar file and the lib directory together or add the lib directory to your class path. By default, the jar also searches for style sheets in the provided styles directory, but you can change this setting if needed. For more information, see the **[configuration](#configuration-files)** section.
 
 If you are working with the source code directly, you can use Maven for dependency management using the provided pom.xml file.
 
@@ -43,16 +43,16 @@ The number of input nodes in your genome determines how many inputs the function
 Now that we have nodes, we can link them together with connections. This combination of connections creates a genome that is quite effective at computing the XOR function.
 
 ```java
-genome.addConnection(0, 3, 0.8248353338278143, true, 1);
-genome.addConnection(1, 3, 1.2738136064118935, true, 2);
-genome.addConnection(2, 3, 0.3608111882329005, true, 3);
-genome.addConnection(3, 3, -2.1257003048212346, true, 4);
-genome.addConnection(4, 4, -1.7403448483523638, true, 5);
-genome.addConnection(3, 4, 1.6865084971308493, true, 6);
-genome.addConnection(0, 4, -0.8566821553088346, true, 7);
-genome.addConnection(4, 3, -1.4887402061853758, true, 8);
-genome.addConnection(1, 4, 1.062670736038381, true, 9);
-genome.addConnection(2, 4, -1.1474625317615665, true, 10);
+genome.addConnection(0, 4, -0.36501593036936775, true, 1);
+genome.addConnection(1, 4, -1.046399730632218, true, 2);
+genome.addConnection(0, 3, 0.556513492344894, true, 3);
+genome.addConnection(4, 3, -0.48188502205686023, true, 4);
+genome.addConnection(2, 4, -0.576176328388935, true, 5);
+genome.addConnection(1, 3, 0.8995301845901448, true, 6);
+genome.addConnection(2, 3, -1.00442116184059, true, 7);
+genome.addConnection(3, 3, -1.0283375490454472, true, 8);
+genome.addConnection(3, 4, 2.0252790846258084, true, 9);
+genome.addConnection(4, 4, 0.24926976625922484, true, 10);
 ```
 
 When adding a connection, the first two arguments are the labels of the nodes to connect. The connection will run from the first of the two nodes to the second. The labels must match nodes that already exist in the genome.
@@ -73,12 +73,12 @@ Once you have a Genome, you can run it to compute the function it represents.
 import com.neatnodes.algorithm.Simulation;
 
 Double[] inputs = {1.0, 0.0};
-Double[] outputs = Simulation.runFunction(genome, inputs, 3);
+Double[] outputs = Simulation.runFunction(genome, inputs, 2);
 ```
 
-This will give the genome the inputs 1 and 0, then run it for 3 steps and read the values from its output nodes. For more information on how the number of steps affects results, see the **[tuning](#tuning-tips)** section.
+This will give the genome the inputs 1 and 0, then run it for 2 steps and read the values from its output nodes. For more information on how the number of steps affects results, see the **[tuning](#tuning-tips)** section.
 
-Since our genome only has a single output node, there will be a single result in the outputs array. When we check this result, we can see that it is 0.9638646095363272 - very close to the result of 1 that we would expect our XOR function to produce.
+Since our genome only has a single output node, there will be a single result in the outputs array. When we check this result, we can see that it is 0.977147347431532 - very close to the result of 1 that we would expect our XOR function to produce.
 
 ## Saving and loading Genomes
 
@@ -108,7 +108,7 @@ A data set is a set of training data used to train the program to compute a spec
 | 2 | 1 | 3 |
 | 2 | 2 | 4 |
 
-The first row of data tells the program that if it receives input values of 1 and 1, it should produce the output value 2, and so on for each subsequent row.  We can use data sets like this one to tell the program what we want it to do, so that it can create a function that will produce these results. The idea is that after showing the program this data set, you could then give it a pair of inputs that don’t appear in the data and have it produce the correct output (e.g. 4 + 4 = 8).
+The first row of data tells the program that if it receives input values of 1 and 1, it should produce the output value 2, and so on for each subsequent row.  We can use data sets like this one to tell the program what we want it to do, so that it can create a function that will produce these results. The idea is that after showing the program this data set, you could then give it a pair of inputs that don’t appear in the data and have it produce the correct output (e.g. 4 + 4 = 8). Note that this particular data set is only used as an example and would require further processing before actually being fed to the algorithm for reasons explained below.
 
 The NEAT algorithm always requires a data set to run. To create a data set, you create a CSV file containing your data and then load it into your program. There are some sample CSV files available in the datasets directory in the release package. Here is the contents of AND.csv:
 
@@ -136,6 +136,8 @@ DataSet dataset = new DataSet("./datasets/AND.csv");
 ```
 
 A DataSet object contains all the data from a CSV data set and can be passed to other functions provided by the library.
+
+An important point to consider when creating data sets is that genomes expect node values to be between -1 and 1. Any values outside this range will in effect be capped at -1 or 1 because of the nature of how nodes process data. For binary logic functions this is no problem, but for other problems it means that you may need to find other ways of representing your data so that you can create a data set with values in the accepted range. The addition.csv file in the datasets directory provides an example of this. This data set represents a function that adds numbers with results between -100 and 100. In order to fit the data within the range -1 to 1, the values have been divided by 100. If we look at the first row, the inputs -1 and 0.1 with the output -0.9 actually represent the sum -100 + 10 = -90. It is simple enough to write your own pre and post-processing methods to convert the data into whatever format you require.
 
 ## Testing Genomes
 
@@ -186,6 +188,8 @@ This will run the full NEAT algorithm to produce a Genome that implements the fu
 The simulation’s progress will be written to stdout as it runs. When the algorithm is complete, it will return a Genome object. A sample of the results produced by the genome and it’s fitness as a score out of 100 can also be seen on stdout.
 
 ![simulation-output.png](/images/simulation-output.png)
+
+Note that simulations take longer to run with larger data sets as there are more results to test. The DEPTH and POPULATION_SIZE parameters will also affect the time it takes to run each generation.
 
 ## Tuning Tips
 
@@ -247,7 +251,7 @@ Essentially we have created a data set that implements an “extended XOR” fun
 
 ## Visualisation
 
-The library also includes visualisation capabilities. Before doing any visualisation, you should make sure that you have your styles set up properly. The library uses CSS files to determine how to display genomes, similar to how web pages are styled. A set of style sheets is included in the release package in the styles directory. As long as this directory is in the same directory as the neatnodes jar file, the library will find the styles without further configuration. However, you can also customise the location that the library looks for style sheets by setting the STYLE_PATH parameter in your configuration file. Note that you must provide a full file path, not a relative path.
+The library also includes visualisation capabilities built on the **[GraphStream](http://graphstream-project.org/)** library. Before doing any visualisation, you should make sure that you have your styles set up properly. The library uses CSS files to determine how to display genomes, similar to how web pages are styled. A set of style sheets is included in the release package in the styles directory. As long as this directory is in the same directory as the neatnodes jar file, the library will find the styles without further configuration. However, you can also customise the location that the library looks for style sheets by setting the STYLE_PATH parameter in your configuration file. Note that you must provide a full file path, not a relative path.
 
 To view a genome, use the viewGenome() function.
 
@@ -259,7 +263,7 @@ This will open a window displaying the genome. You can re-position nodes by drag
 
 ![view-genome.png](/images/view-genome.png)
 
-By changing the RENDER_STYLE parameter in your configuration file, you can change how the genome is displayed. The parameter takes the name of style sheet to use. By default it uses the “normal” style, but other styles are also provided in the default styles directory (“minimal”, “stars”, and “glow”). You can also write your own custom style sheets.
+By changing the RENDER_STYLE parameter in your configuration file, you can change how the genome is displayed. The parameter takes the name of style sheet to use. By default it uses the “normal” style, but other styles are also provided in the default styles directory (“minimal”, “stars”, and “glow”). You can also write your own custom style sheets. For more information, refer to the the **[GraphStream CSS reference](http://graphstream-project.org/doc/Advanced-Concepts/GraphStream-CSS-Reference/)**.
 
 ![styles-example.png](/images/styles-example.png)
 
