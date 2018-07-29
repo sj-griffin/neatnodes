@@ -15,7 +15,8 @@ W_WEIGHT=0.4
 # called dt in the paper. default 3.0
 COMPATABILITY_THRESHOLD=1.0
 
-INITIAL_POPULATION_SIZE=150
+# the number of Genomes in each generation.
+POPULATION_SIZE=150
 
 # the number of generations to run the simulation for
 GENERATIONS=1000

@@ -718,7 +718,7 @@ public class UtilsTests {
 		assertEquals(1.0, configuration.DWeight);
 		assertEquals(0.4, configuration.WWeight);
 		assertEquals(1.0, configuration.compatabilityThreshold);
-		assertEquals(150, configuration.initialPopulationSize);
+		assertEquals(150, configuration.populationSize);
 		assertEquals(1000, configuration.generations);
 		assertEquals(0.75, configuration.crossoverProportion);
 		assertEquals(3, configuration.depth);
@@ -746,7 +746,7 @@ public class UtilsTests {
 		assertEquals(1.0, configuration.DWeight);
 		assertEquals(0.4, configuration.WWeight);
 		assertEquals(1.0, configuration.compatabilityThreshold);
-		assertEquals(150, configuration.initialPopulationSize);
+		assertEquals(150, configuration.populationSize);
 		assertEquals(1000, configuration.generations);
 		assertEquals(0.75, configuration.crossoverProportion);
 		assertEquals(3, configuration.depth);
@@ -791,7 +791,7 @@ public class UtilsTests {
 		assertEquals(3.5, configuration.DWeight);
 		assertEquals(0.8, configuration.WWeight);
 		assertEquals(2.25, configuration.compatabilityThreshold);
-		assertEquals(33, configuration.initialPopulationSize);
+		assertEquals(33, configuration.populationSize);
 		assertEquals(850, configuration.generations);
 		assertEquals(2.3, configuration.crossoverProportion);
 		assertEquals(7, configuration.depth);

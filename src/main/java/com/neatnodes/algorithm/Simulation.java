@@ -142,7 +142,7 @@ public class Simulation {
 		}
 		
 		//setup an initial uniform population in an initial species
-		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), config.initialPopulationSize, iManager, config));
+		allSpecies.add(StaticFunctions.setupInitialSpecies(dataset.getInputNumber(), dataset.getOutputNumber(), config.populationSize, iManager, config));
 		
 		Genome globalChampion = null;
 		
@@ -172,7 +172,7 @@ public class Simulation {
 				//decide what proportion of the next generation each species will produce
 				//a species which contributes more to the globalFitnessSum gets to produce more of the offspring
 				double offspringPercentage = currentSpecies.getAverageFitness() / globalFitnessSum;
-				int numberOfOffspring = (int)Math.floor(offspringPercentage * config.initialPopulationSize);
+				int numberOfOffspring = (int)Math.floor(offspringPercentage * config.populationSize);
 				int numberOfCrossovers = (int)Math.floor(numberOfOffspring * config.crossoverProportion);
 				
 				//cull the weakest genomes from the species before breeding and retrieve the champion of the species

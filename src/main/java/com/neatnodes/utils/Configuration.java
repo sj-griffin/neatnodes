@@ -21,7 +21,7 @@ import java.util.Properties;
  * D_WEIGHT=1.0
  * W_WEIGHT=0.4
  * COMPATABILITY_THRESHOLD=1.0
- * INITIAL_POPULATION_SIZE=150
+ * POPULATION_SIZE=150
  * GENERATIONS=1000
  * CROSSOVER_PROPORTION=0.75
  * DEPTH=3
@@ -40,7 +40,7 @@ public class Configuration {
 	static final String defaultDWeight = "1.0";
 	static final String defaultWWeight = "0.4";
 	static final String defaultCompatabilityThreshold = "1.0";
-	static final String defaultInitialPopulationSize = "150";
+	static final String defaultPopulationSize = "150";
 	static final String defaultGenerations = "1000";
 	static final String defaultCrossoverProportion = "0.75";
 	static final String defaultDepth = "3";
@@ -84,12 +84,12 @@ public class Configuration {
 	public final double compatabilityThreshold;
 	
 	/**
-	 * The number of Genomes in the initial population used to begin the NEAT algorithm.
+	 * The number of Genomes in each generation.
 	 */
-	public final int initialPopulationSize;
+	public final int populationSize;
 	
 	/**
-	 * The number of generations to run the NEAT algorithm for
+	 * The number of generations to run the NEAT algorithm for.
 	 */
 	public final int generations;
 	
@@ -133,7 +133,7 @@ public class Configuration {
 		defaultProps.setProperty("D_WEIGHT", defaultDWeight);
 		defaultProps.setProperty("W_WEIGHT", defaultWWeight);
 		defaultProps.setProperty("COMPATABILITY_THRESHOLD", defaultCompatabilityThreshold);
-		defaultProps.setProperty("INITIAL_POPULATION_SIZE", defaultInitialPopulationSize);
+		defaultProps.setProperty("POPULATION_SIZE", defaultPopulationSize);
 		defaultProps.setProperty("GENERATIONS", defaultGenerations);
 		defaultProps.setProperty("CROSSOVER_PROPORTION", defaultCrossoverProportion);
 		defaultProps.setProperty("DEPTH", defaultDepth);
@@ -173,7 +173,7 @@ public class Configuration {
 			this.DWeight = Double.parseDouble(properties.getProperty("D_WEIGHT"));
 			this.WWeight = Double.parseDouble(properties.getProperty("W_WEIGHT"));
 			this.compatabilityThreshold = Double.parseDouble(properties.getProperty("COMPATABILITY_THRESHOLD"));
-			this.initialPopulationSize = Integer.parseInt(properties.getProperty("INITIAL_POPULATION_SIZE"));
+			this.populationSize = Integer.parseInt(properties.getProperty("POPULATION_SIZE"));
 			this.generations = Integer.parseInt(properties.getProperty("GENERATIONS"));
 			this.crossoverProportion = Double.parseDouble(properties.getProperty("CROSSOVER_PROPORTION"));
 			this.depth = Integer.parseInt(properties.getProperty("DEPTH"));
@@ -197,7 +197,7 @@ public class Configuration {
 		this.DWeight = Double.parseDouble(Configuration.defaultDWeight);
 		this.WWeight = Double.parseDouble(Configuration.defaultWWeight);
 		this.compatabilityThreshold = Double.parseDouble(Configuration.defaultCompatabilityThreshold);
-		this.initialPopulationSize = Integer.parseInt(Configuration.defaultInitialPopulationSize);
+		this.populationSize = Integer.parseInt(Configuration.defaultPopulationSize);
 		this.generations = Integer.parseInt(Configuration.defaultGenerations);
 		this.crossoverProportion = Double.parseDouble(Configuration.defaultCrossoverProportion);
 		this.depth = Integer.parseInt(Configuration.defaultDepth);
